@@ -1,0 +1,26 @@
+{
+  "name": "paracel-prtotype-kit",
+  "version": "1.0.0",
+  "description": "prototype tool with parcel",
+  "cjs": "build/tubu.cjs.js",
+  "module": "build/tubu.esm.js",
+  "main": "build/tubu.js",
+  "libName": "Tubu",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c",
+    "00": "parcel examples/00-example/index.html --no-hmr",
+    "dist00": "parcel build examples/00-example/index.html -d docs/00 --public-url ./",
+    "docs": "python -m SimpleHTTPServer 8000"
+  },
+  "dependencies": {
+    "tubugl-core": "^1.6.0"
+  },
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "gsap": "^1.20.4",
+    "minimist": "^1.2.0",
+    "parcel-bundler": "^1.9.7"
+  }
+}
