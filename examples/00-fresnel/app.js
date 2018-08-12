@@ -1,31 +1,43 @@
-const TweenLite = require('gsap/src/uncompressed/TweenLite');
+import TweenLite from 'gsap/src/uncompressed/TweenLite';
 import dat from '../vendors/dat.gui.min.js';
-import Stats from '../vendors/stats.min';
+import Stats from '../vendors/stats.min.js';
 
-import { Program, ArrayBuffer, IndexArrayBuffer } from 'tubugl-core';
-import vertexShader from './components/shaders/shader-vert.glsl';
-import fragmentShader from './components/shaders/shader-frag.glsl';
-import { appCall } from '../../src/index';
+import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
+import { CameraController } from 'tubugl-camera/src/cameraController';
+import { Mesh } from './mesh.js';
+
+import vertexShaderSrc from './components/shaders/shader-vert.glsl';
+import fragmentShaderSrc from './components/shaders/shader-frag.glsl';
+import { Grid } from '../vendors/utils/grid/grid.js';
 
 export default class App {
 	constructor(params = {}) {
+		/**
+		 * @type {boolean}
+		 */
+		this.isLoop = false;
+
 		this._isMouseDown = false;
 		this._width = params.width ? params.width : window.innerWidth;
 		this._height = params.height ? params.height : window.innerHeight;
 
 		this.canvas = document.createElement('canvas');
 		this.gl = this.canvas.getContext('webgl');
+		this.gl.getExtension('OES_element_index_uint');
 
 		if (params.isDebug) {
 			this._stats = new Stats();
 			document.body.appendChild(this._stats.dom);
 			this._addGui();
+			this._createGrid();
 		} else {
 			let descId = document.getElementById('tubugl-desc');
 			descId.style.display = 'none';
 		}
 
-		this._createProgram();
+		this._createCamera();
+		this._createCameraController();
+
 		this.resize(this._width, this._height);
 	}
 
@@ -34,23 +46,60 @@ export default class App {
 		this.playAndStopGui = this.gui.add(this, '_playAndStop').name('pause');
 	}
 
-	_createProgram() {}
+	_createCamera() {
+		this._camera = new PerspectiveCamera(this._width, this._height, 45, 0.001, 1000);
+		this._camera.position.z = 100;
+		this._camera.lookAt([0, 0, 0]);
+	}
 
-	animateIn() {
+	_createCameraController() {
+		this._cameraController = new CameraController(this._camera, this.canvas);
+		this._cameraController.minDistance = 10;
+		this._cameraController.maxDistance = 1000;
+	}
+
+	_createGrid() {
+		this._grid = new Grid(this.gl);
+	}
+
+	start() {
 		this.isLoop = true;
 		TweenLite.ticker.addEventListener('tick', this.loop, this);
 	}
 
+	renderOnce() {
+		this.isLoop = false;
+		this.loop();
+	}
+
+	createMesh(data) {
+		this._mesh = new Mesh({
+			gl: this.gl,
+			vertexShaderSrc: vertexShaderSrc,
+			fragmentShaderSrc: fragmentShaderSrc,
+			data: data
+		});
+	}
+
 	loop() {
 		if (this._stats) this._stats.update();
+		const gl = this.gl;
 
-		this.gl.clearColor(0, 0, 0, 1);
-		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		gl.viewport(0, 0, this._width, this._height);
+		gl.clearColor(0, 0, 0, 1);
+		gl.enable(gl.DEPTH_TEST);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		this.gl.drawElements(this.gl.TRIANGLES, this._obj.count, this.gl.UNSIGNED_SHORT, 0);
+		this._grid.render(this._camera);
+		this._mesh.render(this._camera);
 	}
 
 	animateOut() {
+		TweenLite.ticker.removeEventListener('tick', this.loop, this);
+	}
+
+	pause() {
+		this.isLoop = false;
 		TweenLite.ticker.removeEventListener('tick', this.loop, this);
 	}
 

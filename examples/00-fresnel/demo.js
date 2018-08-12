@@ -1,6 +1,8 @@
 'use strict';
 
 import App from './app';
+import { getAjaxJson } from '../vendors/utils/funcs';
+import materialballJsonUrl from '../assets/data/3dcoat-materialball.json';
 
 var urlParams = new URLSearchParams(window.location.search);
 const isDebug = !(urlParams.has('NoDebug') || urlParams.has('NoDebug/'));
@@ -24,19 +26,23 @@ function init() {
 }
 
 function start() {
-	app.animateIn();
+	// console.log(materialballJsonUrl);
+	getAjaxJson(materialballJsonUrl).then(rel => {
+		app.createMesh(rel);
+		app.start();
+	});
 }
 
 function onDocumentMouseMove(event) {
-	let mouseX = event.clientX / window.innerWidth * 2 - 1;
-	let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+	const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+	const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
 	app.mouseMoveHandler({ x: mouseX, y: mouseY });
 }
 
 function onDocumentMouseDown(event) {
-	let mouseX = event.clientX / window.innerWidth * 2 - 1;
-	let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+	const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+	const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
 	app.mouseDownHandler({ x: mouseX, y: mouseY });
 }
