@@ -40,6 +40,11 @@ export class Mesh {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.verts), gl.STATIC_DRAW);
 
+		this.normalBuffer = gl.createBuffer();
+		this.aNormalLocation = gl.getAttribLocation(this._program.id, 'normal');
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.normals), gl.STATIC_DRAW);
+
 		this.indexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(data.indices), gl.STATIC_DRAW);
@@ -51,11 +56,15 @@ export class Mesh {
 		this._modelMatrix = mat4.create();
 		this._mvMatrix = mat4.create();
 		this._mvpMatrix = mat4.create();
+
+		this._modelInverse = mat4.create();
+		this._normalMatrix = mat4.create();
 	}
 
 	_getUniformLocation() {
 		const gl = this._gl;
 		this._uMVPMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVPMatrix');
+		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
 	}
 
 	/**
@@ -69,18 +78,29 @@ export class Mesh {
 		mat4.multiply(this._mvpMatrix, camera.projectionMatrix, this._mvMatrix);
 
 		this._program.use();
+
+		// bind position buffer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		gl.vertexAttribPointer(this.aPositionLocation, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.aPositionLocation);
 
+		// bind normalPosition buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.vertexAttribPointer(this.aNormalLocation, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(this.aNormalLocation);
+
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
 		gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
+		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, this._normalMatrix);
 
 		gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 	}
 
 	updateModelMatrix() {
-		this._modelMatrix = mat4.fromTranslation(this._modelMatrix, [0, 7.5, 0]);
+		this._modelMatrix = mat4.fromTranslation(this._modelMatrix, [0, 7.78, 0]);
+
+		mat4.invert(this._modelInverse, this._modelMatrix);
+		mat4.transpose(this._normalMatrix, this._modelInverse);
 	}
 }

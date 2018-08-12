@@ -6,8 +6,8 @@ import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
 import { CameraController } from 'tubugl-camera/src/cameraController';
 import { Mesh } from './mesh.js';
 
-import vertexShaderSrc from './components/shaders/shader-vert.glsl';
-import fragmentShaderSrc from './components/shaders/shader-frag.glsl';
+import vertexShaderSrc from './components/shaders/shader.vert.glsl';
+import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
 import { Grid } from '../vendors/utils/grid/grid.js';
 
 export default class App {
@@ -47,8 +47,11 @@ export default class App {
 	}
 
 	_createCamera() {
-		this._camera = new PerspectiveCamera(this._width, this._height, 45, 0.001, 1000);
-		this._camera.position.z = 100;
+		this._camera = new PerspectiveCamera(this._width, this._height, 45, 1, 10000);
+		this._camera.position.x = 30;
+		this._camera.position.y = 30;
+		this._camera.position.z = 30;
+
 		this._camera.lookAt([0, 0, 0]);
 	}
 
