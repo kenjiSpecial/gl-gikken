@@ -12,6 +12,8 @@ uniform float uSpecular;
 uniform vec3 uLightAmbientColor;
 uniform vec3 uLightColor;
 uniform vec3 uMaterialColor;
+
+uniform bool uIsDiffuseColor;
 uniform bool uIsSpecularColor;
 
 
@@ -47,11 +49,17 @@ void main() {
     
     }else{
 
-        vec3 ambientLightColor = uLightAmbientColor * uMaterialColor;
-        vec3 diffuseColor = uMaterialColor * uLightColor * max(0.0, dot(-normalize(uLightDirection), vNormal));
+        vec3 ambientLightColor;
+
+        // if (uIsAmbientColor) ambientLightColor = uLightAmbientColor * uMaterialColor;
+        // else                 ambientLightColor = vec3(0.);
+        
+
+        vec3 diffuseColor;
+        if (uIsDiffuseColor) diffuseColor = uMaterialColor * uLightColor * max(0.0, dot(-normalize(uLightDirection), vNormal));
+        else                 diffuseColor = vec3(0.);
 
         vec3 specularReflection;
-
         if(uIsSpecularColor){
             vec3 viewDirection = normalize(uCameraPosition - vPosition);
             vec3 halfVector = normalize(viewDirection + normalize(-uLightDirection));
@@ -66,7 +74,7 @@ void main() {
             specularReflection = vec3(0.0);
         }
 
-        color = ambientLightColor + diffuseColor + specularReflection;
+        color = diffuseColor + specularReflection;
         
     }
 

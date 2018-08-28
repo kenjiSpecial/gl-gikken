@@ -16,13 +16,16 @@ export class Mesh {
 	 */
 	constructor(params = {}) {
 		this._gl = params.gl;
+
 		this._isSpecularColor = true;
+		this._isDiffuse = true;
+
 		this._lightState = 0;
 		this._shininess = 1.5;
 		this._specular = 1;
 
-		this._uLightColor = new Color('#333333');
-		this._uMaterialColor = new Color('#ff0000');
+		this._uLightColor = new Color('#aaaaaa');
+		this._uMaterialColor = new Color('#5050aa');
 
 		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
 		this._createBuffer(params.data);
@@ -92,6 +95,7 @@ export class Mesh {
 			this._program.id,
 			'uIsSpecularColor'
 		);
+		this._uIsDiffuseColorLocation = gl.getUniformLocation(this._program.id, 'uIsDiffuseColor');
 	}
 
 	/**
@@ -145,10 +149,12 @@ export class Mesh {
 			this._uMaterialColor.gl[1],
 			this._uMaterialColor.gl[2]
 		);
+
 		gl.uniform1f(this._uLightStateLocation, this._lightState);
 		gl.uniform1f(this._uShininessLocation, this._shininess);
 		gl.uniform1f(this._uLightSpecularLocation, this._specular);
 		gl.uniform1f(this._uIsSpecularColorLocation, this._isSpecularColor);
+		gl.uniform1f(this._uIsDiffuseColorLocation, this._isDiffuse);
 
 		gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 	}
@@ -176,7 +182,7 @@ export class Mesh {
 		let isState = false;
 		for (let ii = 0; ii < stateArr.length; ii++) {
 			if (state === stateArr[ii]) {
-				this._lightState = 1;
+				this._lightState = ii;
 				isState = true;
 			}
 		}
@@ -220,7 +226,11 @@ export class Mesh {
 		this._lightDirectionGui.add(this._lightDirection, 'z', -1, 1).step(0.01);
 
 		let phongMaterialFolder = gui.addFolder('phongMaterial');
-		phongMaterialFolder.add(this, '_isSpecularColor').name('isSpecular');
+		phongMaterialFolder.open();
+
+		phongMaterialFolder.add(this, '_isDiffuse').name('isDiffuseReflection');
+		phongMaterialFolder.add(this, '_isSpecularColor').name('isSpecularHighlight');
+
 		phongMaterialFolder.addColor(this._uLightColor, 'color').name('lightColor');
 		phongMaterialFolder.addColor(this._uMaterialColor, 'color').name('materialColor');
 	}
