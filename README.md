@@ -1,4 +1,4 @@
-# WGL Gikken
+# WebGL Gikken
 
 ## install
 
