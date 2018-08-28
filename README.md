@@ -1,4 +1,4 @@
-# GL Gikken
+# WGL Gikken
 
 ## install
 
