@@ -1,8 +1,4 @@
-# parcel-prototype-kit
-
-[![NPM version][npm-image]][npm-url] 
-
-prototype kit with parcel
+# WebGL Gikken
 
 ## install
 
