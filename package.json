@@ -1,7 +1,7 @@
 {
   "name": "paracel-prtotype-kit",
   "version": "1.0.0",
-  "description": "prototype tool with parcel",
+  "description": "prototype tool with parcelyarn",
   "cjs": "build/tubu.cjs.js",
   "module": "build/tubu.esm.js",
   "main": "build/tubu.js",
@@ -10,6 +10,7 @@
   "scripts": {
     "build": "rollup -c",
     "00": "parcel examples/00-lighting/index.html --no-hmr",
+    "01": "parcel examples/01-pbr-codinglab/index.html --no-hmr",
     "dist00": "parcel build examples/00-lighting/index.html -d docs/00 --public-url ./",
     "server": "http-server ./",
     "parseObj": "node obj-parser/parser.js"

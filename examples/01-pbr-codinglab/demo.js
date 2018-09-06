@@ -28,14 +28,9 @@ function init() {
 function start() {
 	// console.log(materialballJsonUrl);
 	getAjaxJson(materialballJsonUrl).then(rel => {
-		startLoadCubeMaps();
-		// app.createMesh(rel);
-		// app.start();
+		app.createMesh(rel);
+		app.start();
 	});
-}
-
-startLoadCubeMaps(){
-	
 }
 
 function onDocumentMouseMove(event) {
