@@ -79,6 +79,8 @@ export class Mesh {
 
 		this._program.use();
 
+		gl.cullFace(gl.BACK);
+
 		// bind position buffer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		gl.vertexAttribPointer(this.aPositionLocation, 3, gl.FLOAT, false, 0, 0);

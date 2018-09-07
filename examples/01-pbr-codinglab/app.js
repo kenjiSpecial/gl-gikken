@@ -5,6 +5,7 @@ import Stats from '../vendors/stats.min.js';
 import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
 import { CameraController } from 'tubugl-camera/src/cameraController';
 import { Mesh } from './mesh.js';
+import { SkyBox } from './skybox';
 
 import vertexShaderSrc from './components/shaders/shader.vert.glsl';
 import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
@@ -24,7 +25,6 @@ export default class App {
 
 		this.canvas = document.createElement('canvas');
 		this.gl = this.canvas.getContext('webgl');
-		
 
 		this.glState = {
 			hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
@@ -64,6 +64,10 @@ export default class App {
 		this._camera.lookAt([0, 0, 0]);
 	}
 
+	_createSkyBox() {
+		this._skybox = new SkyBox({ gl: this.gl });
+	}
+
 	_createCameraController() {
 		this._cameraController = new CameraController(this._camera, this.canvas);
 		this._cameraController.minDistance = 10;
@@ -74,10 +78,6 @@ export default class App {
 		this._grid = new Grid(this.gl);
 	}
 
-	start() {
-		this._loadDiffuse();
-	}
-
 	_loadDiffuse() {
 		loadCubeMap(this.gl, 'diffuse', this.glState, this._loadSpecular.bind(this));
 	}
@@ -86,14 +86,18 @@ export default class App {
 		loadCubeMap(this.gl, 'specular', this.glState, this._loadedAssets.bind(this));
 	}
 
-	_loadedAssets(){
+	_loadedAssets() {
 		console.log(this.glState.uniforms);
-		
-		this.play();
+		this._createSkyBox();
 
+		this.play();
 	}
 
-	play(){
+	start() {
+		this._loadDiffuse();
+	}
+
+	play() {
 		this.isLoop = true;
 		TweenLite.ticker.addEventListener('tick', this.loop, this);
 	}
@@ -121,7 +125,10 @@ export default class App {
 		gl.enable(gl.DEPTH_TEST);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+		gl.enable(gl.CULL_FACE);
+
 		this._grid.render(this._camera);
+		this._skybox.render(this._camera, this.glState);
 		this._mesh.render(this._camera);
 	}
 
