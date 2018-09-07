@@ -57,9 +57,9 @@ export default class App {
 
 	_createCamera() {
 		this._camera = new PerspectiveCamera(this._width, this._height, 45, 1, 10000);
-		this._camera.position.x = 30;
-		this._camera.position.y = 30;
-		this._camera.position.z = 30;
+		this._camera.position.x = 20;
+		this._camera.position.y = 20;
+		this._camera.position.z = 40;
 
 		this._camera.lookAt([0, 0, 0]);
 	}
@@ -71,11 +71,15 @@ export default class App {
 	_createCameraController() {
 		this._cameraController = new CameraController(this._camera, this.canvas);
 		this._cameraController.minDistance = 10;
-		this._cameraController.maxDistance = 1000;
+		this._cameraController.maxDistance = 80;
 	}
 
 	_createGrid() {
 		this._grid = new Grid(this.gl);
+	}
+
+	_loadEnv() {
+		loadCubeMap(this.gl, 'environment', this.glState, this._loadDiffuse.bind(this));
 	}
 
 	_loadDiffuse() {
@@ -94,12 +98,13 @@ export default class App {
 	}
 
 	start() {
-		this._loadDiffuse();
+		this._loadEnv();
 	}
 
 	play() {
 		this.isLoop = true;
 		TweenLite.ticker.addEventListener('tick', this.loop, this);
+		// this.renderOnce();
 	}
 
 	renderOnce() {

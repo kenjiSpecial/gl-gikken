@@ -1,3 +1,21 @@
+import environmentBack0ImgUrl from '../../assets/images/papermill/environment/environment_back_0.jpg';
+import environmentBottom0ImgUrl from '../../assets/images/papermill/environment/environment_bottom_0.jpg';
+import environmentFront0ImgUrl from '../../assets/images/papermill/environment/environment_front_0.jpg';
+import environmentRight0ImgUrl from '../../assets/images/papermill/environment/environment_right_0.jpg';
+import environmentLeft0ImgUrl from '../../assets/images/papermill/environment/environment_left_0.jpg';
+import environmentTop0ImgUrl from '../../assets/images/papermill/environment/environment_top_0.jpg';
+
+export let environmentImagesUrls = [
+	[
+		environmentRight0ImgUrl,
+		environmentLeft0ImgUrl,
+		environmentTop0ImgUrl,
+		environmentBottom0ImgUrl,
+		environmentFront0ImgUrl,
+		environmentBack0ImgUrl
+	]
+];
+
 import diffuseBack0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_back_0.jpg';
 import diffuseBottom0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_bottom_0.jpg';
 import diffuseFront0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_front_0.jpg';

@@ -47,14 +47,7 @@ export class SkyBox {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
 
-		console.log(this.aNormalLocation);
-		console.log(this.aUvLocation);
-
-		// console.log(normals);
-		console.log(positions);
-
 		this._cnt = positions.length / 3;
-		console.log(this._cnt);
 	}
 
 	_createMatrix() {
@@ -69,11 +62,12 @@ export class SkyBox {
 	_getUniformLocation() {
 		const gl = this._gl;
 		this._uMVPMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVPMatrix');
-		this._uTextureLocation = gl.getUniformLocation(this._program.id, 'uTexture');
+        this._uTextureLocation = gl.getUniformLocation(this._program.id, 'uTexture');
 	}
 
 	updateModelMatrix() {
-		this._modelMatrix = mat4.fromScaling(this._modelMatrix, [300, 300, 300]);
+        const scale = 100;
+		this._modelMatrix = mat4.fromScaling(this._modelMatrix, [scale, scale, scale]);
 	}
 
 	/**
@@ -81,6 +75,7 @@ export class SkyBox {
 	 * @param {PerspectiveCamera} camera
 	 */
 	render(camera, glState) {
+        // console.log(glState.uniforms.u_DiffuseEnvSampler.vals[0]);
 		const gl = this._gl;
 
 		this._program.use();
@@ -95,6 +90,7 @@ export class SkyBox {
 		gl.enableVertexAttribArray(this.aPositionLocation);
 
 		gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
+        gl.uniform1i(this._uTextureLocation, glState.uniforms.u_EnvSampler.vals[0]);
 
 		gl.drawArrays(gl.TRIANGLES, 0, this._cnt);
 	}

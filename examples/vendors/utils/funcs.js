@@ -1,4 +1,4 @@
-import { diffuseImagesUrls, specualarImageUrls } from './enviroment-maps';
+import { diffuseImagesUrls, specualarImageUrls, environmentImagesUrls } from './enviroment-maps';
 
 export function getAjaxJson(url) {
 	let promiseObj = new Promise(function(resolve, reject) {
@@ -50,11 +50,11 @@ export function loadCubeMap(gl, type, state, callback) {
 		mipLevels = 10;
 		urls = specualarImageUrls;
 	} else if (type === 'environment') {
-		console.log(type);
 		uniformName = 'u_EnvSampler';
 		activeTextureEnum = gl.TEXTURE0;
 		textureNumber = 0;
 		mipLevels = 1;
+		urls = environmentImagesUrls;
 	} else {
 		var error = document.getElementById('error');
 		error.innerHTML += 'Invalid type of cubemap loaded<br>';
