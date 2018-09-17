@@ -16,6 +16,60 @@ export let environmentImagesUrls = [
 	]
 ];
 
+import environmentMoonlessBack0ImgUrl from '../../assets/images/moonless_cube_radiance/posz.jpg';
+import environmentMoonlessBottom0ImgUrl from '../../assets/images/moonless_cube_radiance/negy.jpg';
+import environmentMoonlessFront0ImgUrl from '../../assets/images/moonless_cube_radiance/negz.jpg';
+import environmentMoonlessRight0ImgUrl from '../../assets/images/moonless_cube_radiance/posx.jpg';
+import environmentMoonlessLeft0ImgUrl from '../../assets/images/moonless_cube_radiance/negx.jpg';
+import environmentMoonlessTop0ImgUrl from '../../assets/images/moonless_cube_radiance/posy.jpg';
+
+export const environmentMoonlessImagesUrls = [
+	[
+		environmentMoonlessRight0ImgUrl,
+		environmentMoonlessLeft0ImgUrl,
+		environmentMoonlessTop0ImgUrl,
+		environmentMoonlessBottom0ImgUrl,
+		environmentMoonlessFront0ImgUrl,
+		environmentMoonlessBack0ImgUrl
+	]
+];
+
+import environmentPortlandBack0ImgUrl from '../../assets/images/portland_cube_radiance/posz.jpg';
+import environmentPortlandBottom0ImgUrl from '../../assets/images/portland_cube_radiance/negy.jpg';
+import environmentPortlandFront0ImgUrl from '../../assets/images/portland_cube_radiance/negz.jpg';
+import environmentPortlandRight0ImgUrl from '../../assets/images/portland_cube_radiance/posx.jpg';
+import environmentPortlandLeft0ImgUrl from '../../assets/images/portland_cube_radiance/negx.jpg';
+import environmentPortlandTop0ImgUrl from '../../assets/images/portland_cube_radiance/posy.jpg';
+
+export const environmentPortlandImagesUrls = [
+	[
+		environmentPortlandRight0ImgUrl,
+		environmentPortlandLeft0ImgUrl,
+		environmentPortlandTop0ImgUrl,
+		environmentPortlandBottom0ImgUrl,
+		environmentPortlandFront0ImgUrl,
+		environmentPortlandBack0ImgUrl
+	]
+];
+
+import environmentRoadBack0ImgUrl from '../../assets/images/road_cube_radiance/posz.jpg';
+import environmentRoadBottom0ImgUrl from '../../assets/images/road_cube_radiance/negy.jpg';
+import environmentRoadFront0ImgUrl from '../../assets/images/road_cube_radiance/negz.jpg';
+import environmentRoadRight0ImgUrl from '../../assets/images/road_cube_radiance/posx.jpg';
+import environmentRoadLeft0ImgUrl from '../../assets/images/road_cube_radiance/negx.jpg';
+import environmentRoadTop0ImgUrl from '../../assets/images/road_cube_radiance/posy.jpg';
+
+export const environmentRoadImagesUrls = [
+	[
+		environmentRoadRight0ImgUrl,
+		environmentRoadLeft0ImgUrl,
+		environmentRoadTop0ImgUrl,
+		environmentRoadBottom0ImgUrl,
+		environmentRoadFront0ImgUrl,
+		environmentRoadBack0ImgUrl
+	]
+];
+
 import diffuseBack0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_back_0.jpg';
 import diffuseBottom0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_bottom_0.jpg';
 import diffuseFront0ImgUrl from '../../assets/images/papermill/diffuse/diffuse_front_0.jpg';

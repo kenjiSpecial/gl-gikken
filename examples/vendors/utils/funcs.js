@@ -1,4 +1,4 @@
-import { diffuseImagesUrls, specualarImageUrls, environmentImagesUrls } from './enviroment-maps';
+// import { diffuseImagesUrls, specualarImageUrls, environmentImagesUrls } from './enviroment-maps';
 
 export function getAjaxJson(url) {
 	let promiseObj = new Promise(function(resolve, reject) {
@@ -29,14 +29,12 @@ export function getAjaxJson(url) {
 	return promiseObj;
 }
 
-export function loadCubeMap(gl, type, state, callback) {
+export function loadCubeMap(gl, state, callback, uniformName,  urls, num = 0, mipLevels = 1) {
 	var texture = gl.createTexture();
-	var textureNumber = -1;
-	var activeTextureEnum = gl.TEXTURE0;
-	var mipLevels = 0;
-	var uniformName = 'u_EnvSampler';
-	let urls;
-	//
+	var textureNumber = num;
+	var activeTextureEnum = gl.TEXTURE0 + num;
+
+	/**
 	if (type === 'diffuse') {
 		uniformName = 'u_DiffuseEnvSampler';
 		activeTextureEnum = gl.TEXTURE1;
@@ -59,7 +57,7 @@ export function loadCubeMap(gl, type, state, callback) {
 		var error = document.getElementById('error');
 		error.innerHTML += 'Invalid type of cubemap loaded<br>';
 		return -1;
-	}
+	}*/
 
 	gl.activeTexture(activeTextureEnum);
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);

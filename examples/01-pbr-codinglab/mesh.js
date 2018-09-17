@@ -63,19 +63,23 @@ export class Mesh {
 
 	_getUniformLocation() {
 		const gl = this._gl;
-		this._uMVPMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVPMatrix');
+		this._uMVMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVMatrix');
+		this._uPMatirxLocation = gl.getUniformLocation(this._program.id, 'uPMatrix');
+		this._uCameraPosLocation = gl.getUniformLocation(this._program.id, 'uCameraPos');
+
 		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
+		this._uCubeTextureLocation = gl.getUniformLocation(this._program.id, 'uCubeTexture');
 	}
 
 	/**
 	 *
 	 * @param {PerspectiveCamera} camera
 	 */
-	render(camera) {
+	render(camera, glState, uName) {
 		const gl = this._gl;
 
 		mat4.multiply(this._mvMatrix, camera.viewMatrix, this._modelMatrix);
-		mat4.multiply(this._mvpMatrix, camera.projectionMatrix, this._mvMatrix);
+		// mat4.multiply(this._mvpMatrix, camera.projectionMatrix, this._mvMatrix);
 
 		this._program.use();
 
@@ -93,8 +97,12 @@ export class Mesh {
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
-		gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
+		gl.uniformMatrix4fv(this._uMVMatirxLocation, false, this._mvMatrix);
+		gl.uniformMatrix4fv(this._uPMatirxLocation, false, camera.projectionMatrix);
 		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, this._normalMatrix);
+		gl.uniform3f(this._uCameraPosLocation, camera.position.x, camera.position.y, camera.position.z);
+		gl.uniform1i(this._uCubeTextureLocation, glState.uniforms[uName].vals[0]);
+		
 
 		gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 	}

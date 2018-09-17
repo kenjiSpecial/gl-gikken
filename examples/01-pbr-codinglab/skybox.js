@@ -74,7 +74,7 @@ export class SkyBox {
 	 *
 	 * @param {PerspectiveCamera} camera
 	 */
-	render(camera, glState) {
+	render(camera, glState, uName) {
         // console.log(glState.uniforms.u_DiffuseEnvSampler.vals[0]);
 		const gl = this._gl;
 
@@ -90,7 +90,7 @@ export class SkyBox {
 		gl.enableVertexAttribArray(this.aPositionLocation);
 
 		gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
-        gl.uniform1i(this._uTextureLocation, glState.uniforms.u_EnvSampler.vals[0]);
+        gl.uniform1i(this._uTextureLocation, glState.uniforms[uName].vals[0]);
 
 		gl.drawArrays(gl.TRIANGLES, 0, this._cnt);
 	}

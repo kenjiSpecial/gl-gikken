@@ -10,7 +10,16 @@ import { SkyBox } from './skybox';
 import vertexShaderSrc from './components/shaders/shader.vert.glsl';
 import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
 import { Grid } from '../vendors/utils/grid/grid.js';
+
 import { loadCubeMap } from '../vendors/utils/funcs';
+
+import { 
+	environmentMoonlessImagesUrls,
+	environmentPortlandImagesUrls, 
+	environmentRoadImagesUrls 
+} from '../vendors/utils/enviroment-maps';
+
+
 
 export default class App {
 	constructor(params = {}) {
@@ -25,6 +34,14 @@ export default class App {
 
 		this.canvas = document.createElement('canvas');
 		this.gl = this.canvas.getContext('webgl');
+
+		this._textNames = [
+			'Moonless',
+			'Portland',
+			'Road',
+		];
+		this._text = 'Moonless';
+		this._textName = 'uEnvironmentMoonless';
 
 		this.glState = {
 			hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
@@ -52,7 +69,12 @@ export default class App {
 
 	_addGui() {
 		this.gui = new dat.GUI();
-		this.playAndStopGui = this.gui.add(this, '_playAndStop').name('pause');
+		// this.playAndStopGui = this.gui.add(this, '_playAndStop').name('pause');
+		this.gui.add(this, '_text', this._textNames).name('texture').onChange(()=>{
+			this._textName = `uEnvironment${this._text}`;
+			console.log(this._textName);
+			this.loop();
+		});
 	}
 
 	_createCamera() {
@@ -79,15 +101,38 @@ export default class App {
 	}
 
 	_loadEnv() {
-		loadCubeMap(this.gl, 'environment', this.glState, this._loadDiffuse.bind(this));
+		this._loadCnt = 0;
+
+		// const assetUrls = {
+		// 	'environmentMoonless': environmentMoonlessImagesUrls,
+		// 	'environmentPortland': environmentPortlandImagesUrls,
+		// 	'environmentRoad': environmentRoadImagesUrls,
+		// };
+		// console.log(assetUrls);
+		// console.log('_loadEnv');
+
+		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentMoonless', environmentMoonlessImagesUrls, 0);
+		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentPortland', environmentPortlandImagesUrls, 1);
+		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentRoad', environmentRoadImagesUrls, 2);
+
+	}
+
+	_loadEnvDone(){
+		this._loadCnt++;
+
+		if(this._loadCnt == 3) {
+			console.log(this.glState);
+			this._createSkyBox();
+			this.loop();
+		}
 	}
 
 	_loadDiffuse() {
-		loadCubeMap(this.gl, 'diffuse', this.glState, this._loadSpecular.bind(this));
+		// loadCubeMap(this.gl, 'diffuse', this.glState, this._loadSpecular.bind(this));
 	}
 
 	_loadSpecular() {
-		loadCubeMap(this.gl, 'specular', this.glState, this._loadedAssets.bind(this));
+		// loadCubeMap(this.gl, 'specular', this.glState, this._loadedAssets.bind(this));
 	}
 
 	_loadedAssets() {
@@ -102,9 +147,9 @@ export default class App {
 	}
 
 	play() {
-		this.isLoop = true;
-		TweenLite.ticker.addEventListener('tick', this.loop, this);
-		// this.renderOnce();
+		this.isLoop = false;
+		
+		this.loop();
 	}
 
 	renderOnce() {
@@ -132,9 +177,9 @@ export default class App {
 
 		gl.enable(gl.CULL_FACE);
 
-		this._grid.render(this._camera);
-		this._skybox.render(this._camera, this.glState);
-		this._mesh.render(this._camera);
+		// this._grid.render(this._camera);
+		if(this._skybox) this._skybox.render(this._camera, this.glState, this._textName);
+		if(this._mesh) this._mesh.render(this._camera, this.glState, this._textName);
 	}
 
 	animateOut() {
@@ -150,6 +195,8 @@ export default class App {
 		if (!this._isMouseDown) return;
 
 		this._prevMouse = mouse;
+
+		this.loop();
 	}
 
 	mouseDownHandler(mouse) {
@@ -188,6 +235,8 @@ export default class App {
 		this.canvas.height = this._height;
 		this._camera.updateSize(this._width, this._height);
 		this.gl.viewport(0, 0, this._width, this._height);
+
+		this.loop();
 	}
 
 	destroy() {}
