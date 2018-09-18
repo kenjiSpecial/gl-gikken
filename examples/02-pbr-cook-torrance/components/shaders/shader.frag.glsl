@@ -30,17 +30,24 @@ float GGX_Distribution(vec3 n, vec3 h, float alpha)
 }
 
 float saturate(float val){
-    return clamp(val, 0.0, 1.0);
+    return max(val, 0.0);
 }
-
+float GeometrySchlickGGX(float NdotV, float k)
+{
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return nom / denom;
+}
+//https://learnopengl.com/PBR/Theory
 float GGX_PartialGeometryTerm(vec3 v, vec3 n, vec3 h, float alpha)
 {
-    float VoH2 = saturate(dot(v,h));
-    float chi = chiGGX( VoH2 / saturate(dot(v,n)) );
-    VoH2 = VoH2 * VoH2;
-    float tan2 = ( 1. - VoH2 ) / VoH2;
-    return VoH2; //(chi * 2.) / ( 1. + sqrt( 1. + alpha * alpha * tan2 ) );
-    // return a;
+    float NdotV = max(dot(n, v), 0.0);
+    float NdotL = max(dot(n, h), 0.0);
+    float ggx1 = GeometrySchlickGGX(NdotV, alpha);
+    float ggx2 = GeometrySchlickGGX(NdotL, alpha);
+	
+    return ggx1 * ggx2;
 }
 
 void main() {
