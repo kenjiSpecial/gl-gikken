@@ -25,11 +25,8 @@ vec3 getColor(){
     }
 
     return  3.141592 * sampledColour / index;
-
-    // return textureCube( uCubeTexture, reflect( -normalize(uCameraPos-vPos), vNormal )).rgb;
 }
 
 void main() {
     gl_FragColor = vec4(getColor(), 1.0);
-    // gl_FragColor = vec4(1.0);
 } 

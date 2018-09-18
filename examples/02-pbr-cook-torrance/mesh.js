@@ -1,6 +1,9 @@
 import { Program } from 'tubugl-core/src/program';
 import { mat4 } from 'gl-matrix/src/gl-matrix';
-import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
+
+import vertexShaderSrc from './components/shaders/shader.vert.glsl';
+import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
+
 
 export class Mesh {
 	/**
@@ -14,7 +17,11 @@ export class Mesh {
 	 */
 	constructor(params = {}) {
 		this._gl = params.gl;
-		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
+		this._type = 1;
+		this._roughness = 0.1;
+		this._programmName = 'distribution'; // distribution
+
+		this._createProgram(params.vertexShaderSrc);
 		this._createBuffer(params.data);
 		this._createMatrix();
 		this._getUniformLocation();
@@ -22,14 +29,9 @@ export class Mesh {
 		this.updateModelMatrix();
 	}
 
-	/**
-	 *
-	 * @param {string} vertextShaderSrc
-	 * @param {string} fragmentShaderSrc
-	 */
-	_createProgram(vertextShaderSrc, fragmentShaderSrc) {
+	_createProgram() {
 		const gl = this._gl;
-		this._program = new Program(gl, vertextShaderSrc, fragmentShaderSrc);
+		this._program = new Program(gl, vertexShaderSrc, fragmentShaderSrc);
 	}
 
 	_createBuffer(data) {
@@ -66,28 +68,28 @@ export class Mesh {
 		this._uMMatirxLocation = gl.getUniformLocation(this._program.id, 'uMMatrix');
 		this._uVMatirxLocation = gl.getUniformLocation(this._program.id, 'uVMatrix');
 		this._uPMatirxLocation = gl.getUniformLocation(this._program.id, 'uPMatrix');
-		
-		console.log(this._uMMatirxLocation, this._uVMatirxLocation, this._uPMatirxLocation);
 
 		this._uCameraPosLocation = gl.getUniformLocation(this._program.id, 'uCameraPos');
 
+		this._uMVPMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVPMatrix');
 		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
-		this._uCubeTextureLocation = gl.getUniformLocation(this._program.id, 'uCubeTexture');
+		this._uLightDirLocation = gl.getUniformLocation(this._program.id, 'uLightDir');
+		this._uRoughnessLocation = gl.getUniformLocation(this._program.id, 'uRoughness');
+		this._uTypeLocation = gl.getUniformLocation(this._program.id, 'uType');
 	}
 
 	/**
 	 *
 	 * @param {PerspectiveCamera} camera
 	 */
-	render(camera, glState, uName) {
+	render(camera) {
 		const gl = this._gl;
 
 		// mat4.multiply(this._mvMatrix, camera.viewMatrix, this._modelMatrix);
 		// mat4.multiply(this._mvpMatrix, camera.projectionMatrix, this._mvMatrix);
+		// mat4.multiply(this._mvMatrix, camera.viewMatrix, this._modelMatrix);
 
 		this._program.use();
-
-		gl.cullFace(gl.BACK);
 
 		// bind position buffer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
@@ -107,8 +109,9 @@ export class Mesh {
 
 		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, this._normalMatrix);
 		gl.uniform3f(this._uCameraPosLocation, camera.position.x, camera.position.y, camera.position.z);
-		gl.uniform1i(this._uCubeTextureLocation, glState.uniforms[uName].vals[0]);
-		
+		gl.uniform3f(this._uLightDirLocation, 0, -1, 0);
+		gl.uniform1f(this._uRoughnessLocation, this._roughness);
+		gl.uniform1f(this._uTypeLocation, this._type);
 
 		gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 	}
@@ -118,5 +121,13 @@ export class Mesh {
 
 		mat4.invert(this._modelInverse, this._modelMatrix);
 		mat4.transpose(this._normalMatrix, this._modelInverse);
+	}
+
+	addGui(gui) {
+		gui.add(this, '_roughness', 0.0, 1.0).step(0.01).name('roughness');
+		gui.add(this, '_programmName', ['distribution', 'geometry']).onChange(()=>{
+			if(this._programmName === 'distribution') this._type = 0;
+			else if(this._programmName === 'geometry') this._type = 1;
+		});
 	}
 }
