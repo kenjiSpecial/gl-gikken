@@ -40,7 +40,7 @@ float GeometrySchlickGGX(float NdotV, float k)
     return nom / denom;
 }
 //https://learnopengl.com/PBR/Theory
-float GGX_PartialGeometryTerm(vec3 v, vec3 n, vec3 h, float alpha)
+float GeometrySmith(vec3 v, vec3 n, vec3 h, float alpha)
 {
     float NdotV = max(dot(n, v), 0.0);
     float NdotL = max(dot(n, h), 0.0);
@@ -50,14 +50,26 @@ float GGX_PartialGeometryTerm(vec3 v, vec3 n, vec3 h, float alpha)
     return ggx1 * ggx2;
 }
 
+
+
+float GGX_PartialGeometryTerm(vec3 v, vec3 n, vec3 h, float alpha){
+    float VoH2 = max(dot(v, h), 0.0);
+    // float chi = chiGGX(VoH2 / max(dot(v, n), 0.0));
+    VoH2 = VoH2 * VoH2;
+    float tan2 = ( 1.0 - VoH2 ) / VoH2;
+
+    return 2.0 / ( 1.0 + sqrt( 1.0 + alpha * alpha * tan2 ) );
+}
+
 void main() {
     // vec3 color = normalize(vNormal + vec3(1.0));
+    vec3 normal = normalize(vNormal);
     vec3 camDir = normalize(uCameraPos - vPos);
     vec3 halfVec = normalize( normalize(-uLightDir) + camDir);
 
     vec3 color;
     if(uType < 1.) color = vec3(GGX_Distribution(vNormal, halfVec, uRoughness));
-    else if(uType < 2.) color = vec3(GGX_PartialGeometryTerm(camDir, vNormal, halfVec, uRoughness));
+    else if(uType < 2.) color = vec3(GGX_PartialGeometryTerm(camDir, normal, halfVec, uRoughness));
     else color = vec3(1.0);
 
     gl_FragColor = vec4(vec3(color), 1.0);

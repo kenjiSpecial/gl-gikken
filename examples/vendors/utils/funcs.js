@@ -29,35 +29,10 @@ export function getAjaxJson(url) {
 	return promiseObj;
 }
 
-export function loadCubeMap(gl, state, callback, uniformName,  urls, num = 0, mipLevels = 1) {
+export function loadCubeMap(gl, state, callback, uniformName, urls, num = 0, mipLevels = 1) {
 	var texture = gl.createTexture();
 	var textureNumber = num;
 	var activeTextureEnum = gl.TEXTURE0 + num;
-
-	/**
-	if (type === 'diffuse') {
-		uniformName = 'u_DiffuseEnvSampler';
-		activeTextureEnum = gl.TEXTURE1;
-		textureNumber = 1;
-		mipLevels = 1;
-		urls = diffuseImagesUrls;
-	} else if (type === 'specular') {
-		uniformName = 'u_SpecularEnvSampler';
-		activeTextureEnum = gl.TEXTURE2;
-		textureNumber = 2;
-		mipLevels = 10;
-		urls = specualarImageUrls;
-	} else if (type === 'environment') {
-		uniformName = 'u_EnvSampler';
-		activeTextureEnum = gl.TEXTURE0;
-		textureNumber = 0;
-		mipLevels = 1;
-		urls = environmentImagesUrls;
-	} else {
-		var error = document.getElementById('error');
-		error.innerHTML += 'Invalid type of cubemap loaded<br>';
-		return -1;
-	}*/
 
 	gl.activeTexture(activeTextureEnum);
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
