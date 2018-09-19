@@ -48,7 +48,11 @@ export default class App {
 			hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
 			hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
 			hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
-			uniforms: {}
+			uniforms: {
+				textures : {
+					
+				}
+			}
 		};
 
 		if (params.isDebug) {

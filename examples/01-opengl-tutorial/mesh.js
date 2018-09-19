@@ -30,6 +30,8 @@ export class Mesh {
 	_createProgram(vertextShaderSrc, fragmentShaderSrc) {
 		const gl = this._gl;
 		this._program = new Program(gl, vertextShaderSrc, fragmentShaderSrc);
+		// let location = gl.getUniformLocation(this._program.id, 'uColorTex');
+		// console.log(location);
 	}
 
 	_createBuffer(data) {

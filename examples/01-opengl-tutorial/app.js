@@ -43,7 +43,11 @@ export default class App {
 			hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
 			hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
 			hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
-			uniforms: {}
+			uniforms: {
+				textures: {
+
+				}
+			}
 		};
 
 		if (params.isDebug) {
@@ -87,10 +91,13 @@ export default class App {
 	}
 
 	_loadTextures() {
-		loadTextures(this.gl, this.glState, goldImagesUrls, this._loadTextureDone.bind(this), this._startIndex );
+		loadTextures(this.gl, this.glState, 'gold', goldImagesUrls, this._loadTextureDone.bind(this) );
 	}
 
-
+	_loadTextureDone() {
+		// console.log('loadTextureDone');
+		this.loop();
+	}
 
 	_loadEnv() {
 		this._loadCnt = 0;
@@ -149,6 +156,8 @@ export default class App {
 		if (!this._isMouseDown) return;
 
 		this._prevMouse = mouse;
+
+		this.loop();
 	}
 
 	mouseDownHandler(mouse) {
@@ -187,6 +196,8 @@ export default class App {
 		this.canvas.height = this._height;
 		this._camera.updateSize(this._width, this._height);
 		this.gl.viewport(0, 0, this._width, this._height);
+
+		this.loop();
 	}
 
 	destroy() {}

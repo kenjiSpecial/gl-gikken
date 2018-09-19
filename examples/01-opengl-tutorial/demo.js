@@ -58,3 +58,7 @@ window.addEventListener('resize', function() {
 window.addEventListener('keydown', function(ev) {
 	app.onKeyDown(ev);
 });
+
+window.addEventListener('mousewheel', function() {
+	app.loop();
+});
