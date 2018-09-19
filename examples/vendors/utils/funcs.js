@@ -29,6 +29,23 @@ export function getAjaxJson(url) {
 	return promiseObj;
 }
 
+export function loadTextures(gl, state, urls, callback) {
+
+	// let texture = gl.createTexture();
+
+	
+	// upload texture
+
+	for(let ii = 0; ii < urls.length; ii++){
+		let url = urls[ii];
+		console.log(url);
+	}
+}
+
+function isPowerOf2(value) {
+	return (value & (value - 1)) == 0;
+}
+
 export function loadCubeMap(gl, state, callback, uniformName,  urls, num = 0, mipLevels = 1) {
 	var texture = gl.createTexture();
 	var textureNumber = num;
