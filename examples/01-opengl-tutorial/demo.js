@@ -60,5 +60,5 @@ window.addEventListener('keydown', function(ev) {
 });
 
 window.addEventListener('mousewheel', function() {
-	app.loop();
+	// app.loop();
 });

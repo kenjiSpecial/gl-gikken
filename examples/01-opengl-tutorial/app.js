@@ -97,7 +97,9 @@ export default class App {
 	_loadTextureDone() {
 		this._mesh.addTexture(this.glState.uniforms.textures);
 
-		this.loop();
+		this.isLoop = true;
+		this._curTime = +new Date;
+		TweenLite.ticker.addEventListener('tick', this.loop, this);
 	}
 
 	_loadEnv() {
@@ -109,8 +111,7 @@ export default class App {
 	}
 
 	start() {
-		// this.isLoop = true;
-		// TweenLite.ticker.addEventListener('tick', this.loop, this);
+		
 		this._startIndex = 0;
 		this._loadTextures();
 	}
@@ -132,6 +133,8 @@ export default class App {
 	loop() {
 		if (this._stats) this._stats.update();
 		const gl = this.gl;
+		let time = +new Date;
+		let del = time - this._curTime;
 
 		gl.viewport(0, 0, this._width, this._height);
 		gl.clearColor(0, 0, 0, 1);
@@ -139,7 +142,8 @@ export default class App {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		this._grid.render(this._camera);
-		if (this._mesh) this._mesh.render(this._camera);
+		this._curTime = time;
+		if (this._mesh) this._mesh.render(this._camera, del);
 	}
 
 	animateOut() {
@@ -156,7 +160,7 @@ export default class App {
 
 		this._prevMouse = mouse;
 
-		this.loop();
+		// this.loop();
 	}
 
 	mouseDownHandler(mouse) {
@@ -196,7 +200,7 @@ export default class App {
 		this._camera.updateSize(this._width, this._height);
 		this.gl.viewport(0, 0, this._width, this._height);
 
-		this.loop();
+		// this.loop();
 	}
 
 	destroy() {}
