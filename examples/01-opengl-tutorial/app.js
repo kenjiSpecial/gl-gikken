@@ -5,21 +5,20 @@ import Stats from '../vendors/stats.min.js';
 import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
 import { CameraController } from 'tubugl-camera/src/cameraController';
 import { Mesh } from './mesh.js';
-import { SkyBox } from './skybox';
 
 import vertexShaderSrc from './components/shaders/shader.vert.glsl';
 import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
 import { Grid } from '../vendors/utils/grid/grid.js';
 
-import { loadCubeMap } from '../vendors/utils/funcs';
+import { loadCubeMap, loadTextures } from '../vendors/utils/funcs';
 
-import { 
+import {
 	environmentMoonlessImagesUrls,
-	environmentPortlandImagesUrls, 
-	environmentRoadImagesUrls 
+	environmentPortlandImagesUrls,
+	environmentRoadImagesUrls
 } from '../vendors/utils/enviroment-maps';
 
-
+import { barkImagesUrls, goldImagesUrls, stoneImagesUrls } from '../vendors/utils/textures';
 
 export default class App {
 	constructor(params = {}) {
@@ -35,23 +34,13 @@ export default class App {
 		this.canvas = document.createElement('canvas');
 		this.gl = this.canvas.getContext('webgl');
 
-		this._textNames = [
-			'Moonless',
-			'Portland',
-			'Road',
-		];
-		this._text = 'Moonless';
-		this._textName = 'uEnvironmentMoonless';
-
 		this.glState = {
 			hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
 			hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
 			hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
 			hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
 			uniforms: {
-				textures : {
-					
-				}
+				textures: {}
 			}
 		};
 
@@ -73,79 +62,57 @@ export default class App {
 
 	_addGui() {
 		this.gui = new dat.GUI();
-		// this.playAndStopGui = this.gui.add(this, '_playAndStop').name('pause');
-		this.gui.add(this, '_text', this._textNames).name('texture').onChange(()=>{
-			this._textName = `uEnvironment${this._text}`;
-			console.log(this._textName);
-			this.loop();
-		});
+		this.playAndStopGui = this.gui.add(this, '_playAndStop').name('pause');
 	}
 
 	_createCamera() {
 		this._camera = new PerspectiveCamera(this._width, this._height, 45, 1, 10000);
-		this._camera.position.x = 20;
-		this._camera.position.y = 20;
-		this._camera.position.z = 40;
+		this._camera.position.x = 30;
+		this._camera.position.y = 30;
+		this._camera.position.z = 30;
 
 		this._camera.lookAt([0, 0, 0]);
-	}
-
-	_createSkyBox() {
-		this._skybox = new SkyBox({ gl: this.gl });
 	}
 
 	_createCameraController() {
 		this._cameraController = new CameraController(this._camera, this.canvas);
 		this._cameraController.minDistance = 10;
-		this._cameraController.maxDistance = 80;
+		this._cameraController.maxDistance = 1000;
 	}
 
 	_createGrid() {
 		this._grid = new Grid(this.gl);
 	}
 
+	_loadTextures() {
+		loadTextures(
+			this.gl,
+			this.glState,
+			'gold',
+			goldImagesUrls,
+			this._loadTextureDone.bind(this)
+		);
+	}
+
+	_loadTextureDone() {
+		this._mesh.addTexture(this.glState.uniforms.textures);
+
+		this.loop();
+	}
+
 	_loadEnv() {
 		this._loadCnt = 0;
-		
-		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentMoonless', environmentMoonlessImagesUrls, 0);
-		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentPortland', environmentPortlandImagesUrls, 1);
-		loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentRoad', environmentRoadImagesUrls, 2);
 
-	}
-
-	_loadEnvDone(){
-		this._loadCnt++;
-
-		if(this._loadCnt == 3) {
-			console.log(this.glState);
-			this._createSkyBox();
-			this.loop();
-		}
-	}
-
-	_loadDiffuse() {
-		// loadCubeMap(this.gl, 'diffuse', this.glState, this._loadSpecular.bind(this));
-	}
-
-	_loadSpecular() {
-		// loadCubeMap(this.gl, 'specular', this.glState, this._loadedAssets.bind(this));
-	}
-
-	_loadedAssets() {
-		console.log(this.glState.uniforms);
-		this._createSkyBox();
-
-		this.play();
+		// loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentMoonless', environmentMoonlessImagesUrls, 0);
+		// loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentPortland', environmentPortlandImagesUrls, 1);
+		// loadCubeMap(this.gl, this.glState, this._loadEnvDone.bind(this), 'uEnvironmentRoad', environmentRoadImagesUrls, 2);
 	}
 
 	start() {
-		this._loadEnv();
-	}
-
-	play() {
-		this.isLoop = false;
-		
-		this.loop();
+		// this.isLoop = true;
+		// TweenLite.ticker.addEventListener('tick', this.loop, this);
+		this._startIndex = 0;
+		this._loadTextures();
 	}
 
 	renderOnce() {
@@ -171,11 +138,8 @@ export default class App {
 		gl.enable(gl.DEPTH_TEST);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		gl.enable(gl.CULL_FACE);
-
-		// this._grid.render(this._camera);
-		if(this._skybox) this._skybox.render(this._camera, this.glState, this._textName);
-		if(this._mesh) this._mesh.render(this._camera, this.glState, this._textName);
+		this._grid.render(this._camera);
+		if (this._mesh) this._mesh.render(this._camera);
 	}
 
 	animateOut() {
