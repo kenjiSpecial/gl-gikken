@@ -61,6 +61,8 @@ void main() {
 
     vec3 F0 = vec3(0.04); 
     float metallic = uMetallic;
+    float roughness = uRoughness;
+    vec3 albedo = uAlbedo;
     // F0 = mix(F0, uAlbedo, metallic);
 
     // reflectance equation
@@ -73,16 +75,16 @@ void main() {
         vec3 H = normalize(V + L);
         float distance = length(lightPosition - vWorldPos);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = vec3(1000.0) * attenuation;
+        vec3 radiance = vec3(300.) * attenuation;
 
         // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, uRoughness);   
-        float G   = GeometrySmith(N, V, L, uRoughness);      
-        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+        float NDF = DistributionGGX(N, H, roughness);   
+        float G   = GeometrySmith(N, V, L, roughness);      
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
-        vec3 nominator    = NDF * G * F;    
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-        vec3 specular = nominator ; // max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
+        vec3 nominator    = NDF * G * F; 
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        vec3 specular = nominator / denominator;
         
         // kS is equal to Fresnel
         vec3 kS = F;
@@ -99,7 +101,7 @@ void main() {
         float NdotL = max(dot(N, L), 0.0);        
 
         // add to outgoing radiance Lo
-        Lo += (kD * uAlbedo / PI + specular) ;//* radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }   
     // vec3 color = ambient + Lo;
     // vec3 color = Lo;

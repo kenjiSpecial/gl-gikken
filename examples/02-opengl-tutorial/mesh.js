@@ -15,7 +15,7 @@ export class Mesh {
 	 */
 	constructor(params = {}) {
 		this._gl = params.gl;
-		this._textureType = 'gold';
+		this._textureType = 'brick';
 		this._time = 0;
 
 		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
@@ -48,54 +48,41 @@ export class Mesh {
 		this.positionBuffer = gl.createBuffer();
 		this.aPositionLocation = gl.getAttribLocation(this._program.id, 'position');
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.verts), gl.STATIC_DRAW);
 
 		this.normalBuffer = gl.createBuffer();
 		this.aNormalLocation = gl.getAttribLocation(this._program.id, 'normal');
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.normals), gl.STATIC_DRAW);
 
 		this.uvBuffer = gl.createBuffer();
 		this.aUvLocation = gl.getAttribLocation(this._program.id, 'uv');
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textures), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.texcoords), gl.STATIC_DRAW);
 
 		this.indexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), gl.STATIC_DRAW);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(data.indices), gl.STATIC_DRAW);
 
-		this._cnt = indices.length;
+		this._cnt = data.indices.length;
 	}
 
 	_createMatrix() {
-		// this._modelMatrix = mat4.create();
+		
+		let xpos = 0;
+		let ypos = 8;
 
-		// this._modelMatrixArr = [];
-		// this._normalMatrixArr = [];
+		let modelMatrix = mat4.create();
+		let modelInverse = mat4.create();
+		let normalMatrix = mat4.create();
 
-		// for (let xx = -4; xx < 5; xx++) {
-		// 	this._modelMatrixArr.push([]);
-		// 	this._normalMatrixArr.push([]);
+		mat4.fromTranslation(modelMatrix, [xpos, ypos, 0]);
 
-		// 	for (let yy = -4; yy < 5; yy++) {
-				let xpos = 6 * xx;
-				let ypos = 6 * yy;
+		mat4.invert(modelInverse, modelMatrix);
+		mat4.transpose(normalMatrix, modelInverse);
+		this._modelMatrix = modelMatrix;
+		this._normalMatrix = normalMatrix;
 
-				let modelMatrix = mat4.create();
-				let modelInverse = mat4.create();
-				let normalMatrix = mat4.create();
-
-				mat4.fromTranslation(modelMatrix, [xpos, ypos, 0]);
-
-				mat4.invert(modelInverse, modelMatrix);
-				mat4.transpose(normalMatrix, modelInverse);
-				this._modelMatrix = modelMatrix;
-				this._normalMatrix = normalMatrix;
-
-				// this._modelMatrixArr[xx + 4][yy + 4] = modelMatrix;
-				// this._normalMatrixArr[xx + 4][yy + 4] = normalMatrix;
-		// 	}
-		// }
 		this._mvMatrix = mat4.create();
 		this._mvpMatrix = mat4.create();
 
@@ -113,15 +100,16 @@ export class Mesh {
 		);
 		this._uCameraPosLocation = gl.getUniformLocation(this._program.id, 'uCameraPos');
 		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
-		this._uAlbedoLocation = gl.getUniformLocation(this._program.id, 'uAlbedo');
-		this._uMetallicLocation = gl.getUniformLocation(this._program.id, 'uMetallic');
-		this._uRoughnessLocation = gl.getUniformLocation(this._program.id, 'uRoughness');
+		// this._uAlbedoLocation = gl.getUniformLocation(this._program.id, 'uAlbedo');
+		// this._uMetallicLocation = gl.getUniformLocation(this._program.id, 'uMetallic');
+		// this._uRoughnessLocation = gl.getUniformLocation(this._program.id, 'uRoughness');
 		this._uLightPosLocation = gl.getUniformLocation(this._program.id, 'uLightPos');
 
-		this._uColorTexLocation = gl.getUniformLocation(this._program.id, 'uColorTex');
+		this._uAlbedoTexLocation = gl.getUniformLocation(this._program.id, 'uAlbedoTex');
 		this._uAoTexLocation = gl.getUniformLocation(this._program.id, 'uAoTex');
 		this._uNormalTexLocation = gl.getUniformLocation(this._program.id, 'uNormalTex');
 		this._uRoughnessTexLocation = gl.getUniformLocation(this._program.id, 'uRoughnessTex');
+		this._uMetallicTexLocation = gl.getUniformLocation(this._program.id, 'uMetallicTex');
 	}
 
 	/**
@@ -165,9 +153,9 @@ export class Mesh {
 		// gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
 		gl.uniform3f(
 			this._uLightPosLocation,
-			10 * Math.cos(this._time),
-			10 * Math.sin(this._time),
-			5
+			20 * Math.cos(this._time),
+			20 * Math.sin(this._time),
+			10
 		);
 
 		gl.uniformMatrix4fv(this._uViewMatirxLocation, false, camera.viewMatrix);
@@ -179,14 +167,12 @@ export class Mesh {
 			camera.position.y,
 			camera.position.z
 		);
-		gl.uniform3f(this._uAlbedoLocation, 0.5, 0.0, 0.0);
-		// gl.uniform1f(this._uMetallicLocation, 0.1);
 
 		// active texture
 
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].color);
-		gl.uniform1i(this._uColorTexLocation, 0);
+		gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].albedo);
+		gl.uniform1i(this._uAlbedoTexLocation, 0);
 
 		if (this._uAoTexLocation) {
 			gl.activeTexture(gl.TEXTURE1);
@@ -207,13 +193,19 @@ export class Mesh {
 			gl.uniform1i(this._uRoughnessTexLocation, 3);
 		}
 
+		if(this._uMetallicTexLocation){
+			gl.activeTexture(gl.TEXTURE4);
+			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].metallic);
+			gl.uniform1i(this._uMetallicTexLocation, 4);
+		}
+
 		// for (let xx = 0; xx < 9; xx++) {
 		// 	for (let yy = 0; yy < 9; yy++) {
 				const modelMat = this._modelMatrix; //Arr[xx][yy];
 				const normalMat = this._normalMatrix; //Arr[xx][yy];
 
-				gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
-				gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
+				// gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
+				// gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
 
 				gl.uniformMatrix4fv(this._uMmodelMatirxLocation, false, modelMat);
 				gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, normalMat);
@@ -224,7 +216,11 @@ export class Mesh {
 
 	addTexture(textures) {
 		this._textures = textures;
-		console.log(this._textures.gold);
+		console.log(this._textures);
+	}
+
+	addGui(gui){
+		gui.add(this, '_textureType', ['fabric', 'chipped', 'brick']);
 	}
 
 }

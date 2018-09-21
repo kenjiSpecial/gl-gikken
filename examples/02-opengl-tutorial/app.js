@@ -18,7 +18,7 @@ import {
 	environmentRoadImagesUrls
 } from '../vendors/utils/enviroment-maps';
 
-import { barkImagesUrls, goldImagesUrls, stoneImagesUrls } from '../vendors/utils/textures';
+import { chippedImagesUrls, fabricImagesUrls, brickImagesUrls } from '../vendors/utils/textures';
 
 export default class App {
 	constructor(params = {}) {
@@ -85,17 +85,38 @@ export default class App {
 	}
 
 	_loadTextures() {
+		this._textureCnt = 0;
+
+		// chippedImagesUrls, fabricImagesUrls, brickImagesUrls
 		loadTextures(
 			this.gl,
 			this.glState,
-			'gold',
-			// goldImagesUrls,
-			barkImagesUrls,
+			'chipped',
+			chippedImagesUrls,
+			this._loadTextureDone.bind(this)
+		);
+
+		loadTextures(
+			this.gl,
+			this.glState,
+			'fabric',
+			fabricImagesUrls,
+			this._loadTextureDone.bind(this)
+		);
+
+		loadTextures(
+			this.gl,
+			this.glState,
+			'brick',
+			brickImagesUrls,
 			this._loadTextureDone.bind(this)
 		);
 	}
 
 	_loadTextureDone() {
+		this._textureCnt++;
+		if(this._textureCnt<3) return;
+
 		this._mesh.addTexture(this.glState.uniforms.textures);
 
 		this.isLoop = true;
@@ -129,6 +150,7 @@ export default class App {
 			fragmentShaderSrc: fragmentShaderSrc,
 			data: data
 		});
+		if(this.gui) this._mesh.addGui(this.gui);
 	}
 
 	loop() {

@@ -142,7 +142,7 @@ export default class App {
 		gl.enable(gl.DEPTH_TEST);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		this._grid.render(this._camera);
+		// this._grid.render(this._camera);
 		this._curTime = time;
 		if (this._mesh) this._mesh.render(this._camera, del);
 	}

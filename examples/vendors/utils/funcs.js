@@ -31,7 +31,7 @@ export function getAjaxJson(url) {
 
 export function loadTextures(gl, state, name, urls, callback) {
 	// let texture = gl.createTexture();
-	console.log(state.uniforms);
+	// console.log(state.uniforms);
 	state.uniforms.textures[name] = {};
 
 	let self = this;
@@ -39,7 +39,6 @@ export function loadTextures(gl, state, name, urls, callback) {
 	let targetCnt = urls.length;
 
 	function onLoadImage(url, image) {
-		console.log(image);
 		return function() {
 			let texName = url.split('/')[1].split('.')[0];
 			let texture = gl.createTexture();
