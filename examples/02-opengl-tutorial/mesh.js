@@ -1,7 +1,7 @@
 import { Program } from 'tubugl-core/src/program';
 import { mat4 } from 'gl-matrix/src/gl-matrix';
 import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
-import { sphere, Sphere } from './sphere';
+// import { sphere, Sphere } from './sphere';
 
 export class Mesh {
 	/**
@@ -41,8 +41,9 @@ export class Mesh {
 	_createBuffer(data) {
 		const gl = this._gl;
 
+		console.log(data);
 		// console.log(Sphere());
-		let { vertices, textures, normals, indices } = Sphere();
+		// let { vertices, textures, normals, indices } = Sphere();
 
 		this.positionBuffer = gl.createBuffer();
 		this.aPositionLocation = gl.getAttribLocation(this._program.id, 'position');
@@ -69,14 +70,14 @@ export class Mesh {
 	_createMatrix() {
 		// this._modelMatrix = mat4.create();
 
-		this._modelMatrixArr = [];
-		this._normalMatrixArr = [];
+		// this._modelMatrixArr = [];
+		// this._normalMatrixArr = [];
 
-		for (let xx = -4; xx < 5; xx++) {
-			this._modelMatrixArr.push([]);
-			this._normalMatrixArr.push([]);
+		// for (let xx = -4; xx < 5; xx++) {
+		// 	this._modelMatrixArr.push([]);
+		// 	this._normalMatrixArr.push([]);
 
-			for (let yy = -4; yy < 5; yy++) {
+		// 	for (let yy = -4; yy < 5; yy++) {
 				let xpos = 6 * xx;
 				let ypos = 6 * yy;
 
@@ -88,10 +89,13 @@ export class Mesh {
 
 				mat4.invert(modelInverse, modelMatrix);
 				mat4.transpose(normalMatrix, modelInverse);
-				this._modelMatrixArr[xx + 4][yy + 4] = modelMatrix;
-				this._normalMatrixArr[xx + 4][yy + 4] = normalMatrix;
-			}
-		}
+				this._modelMatrix = modelMatrix;
+				this._normalMatrix = normalMatrix;
+
+				// this._modelMatrixArr[xx + 4][yy + 4] = modelMatrix;
+				// this._normalMatrixArr[xx + 4][yy + 4] = normalMatrix;
+		// 	}
+		// }
 		this._mvMatrix = mat4.create();
 		this._mvpMatrix = mat4.create();
 
@@ -203,10 +207,10 @@ export class Mesh {
 			gl.uniform1i(this._uRoughnessTexLocation, 3);
 		}
 
-		for (let xx = 0; xx < 9; xx++) {
-			for (let yy = 0; yy < 9; yy++) {
-				const modelMat = this._modelMatrixArr[xx][yy];
-				const normalMat = this._normalMatrixArr[xx][yy];
+		// for (let xx = 0; xx < 9; xx++) {
+		// 	for (let yy = 0; yy < 9; yy++) {
+				const modelMat = this._modelMatrix; //Arr[xx][yy];
+				const normalMat = this._normalMatrix; //Arr[xx][yy];
 
 				gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
 				gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
@@ -214,8 +218,8 @@ export class Mesh {
 				gl.uniformMatrix4fv(this._uMmodelMatirxLocation, false, modelMat);
 				gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, normalMat);
 				gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
-			}
-		}
+		// 	}
+		// }
 	}
 
 	addTexture(textures) {
@@ -223,11 +227,4 @@ export class Mesh {
 		console.log(this._textures.gold);
 	}
 
-	updateModelMatrix() {
-		// this._modelMatrix = mat4.fromTranslation(this._modelMatrix, [0, 7.78, 0]);
-
-		mat4.invert(this._modelInverse, this._modelMatrix);
-		mat4.transpose(this._normalMatrix, this._modelInverse);
-		console.log(this._modelMatrixArr);
-	}
 }
