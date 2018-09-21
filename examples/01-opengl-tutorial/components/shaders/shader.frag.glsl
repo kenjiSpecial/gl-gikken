@@ -3,7 +3,7 @@ precision highp float;
 
 uniform sampler2D uColorTex;
 uniform sampler2D uAoTex;
-uniform vec3 uCamPos;
+uniform vec3 uCameraPos;
 
 uniform vec3  uAlbedo;
 uniform float uMetallic;
@@ -57,7 +57,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 void main() {
     vec3 N = normalize(vNormal);
-    vec3 V = normalize(uCamPos - vWorldPos);
+    vec3 V = normalize(uCameraPos - vWorldPos);
 
     vec3 F0 = vec3(0.04); 
     float metallic = uMetallic;
@@ -65,15 +65,15 @@ void main() {
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    // for(float i = 0.; i < 4.; i++) {
-        vec3 lightPosition = uLightPos;// + vec3(i * 5. -2.5, i * 2. - 2.5, 0.0);
+    for(float i = 0.; i < 4.; i++) {
+        vec3 lightPosition = uLightPos + vec3(i * 5. -2.5, i * 2. - 2.5, 0.0);
         // calculate per-light radiance
         vec3 L = normalize(lightPosition - vWorldPos);
         // L = vec3(0., 0., 1.);
         vec3 H = normalize(V + L);
         float distance = length(lightPosition - vWorldPos);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = vec3(1000.0) * attenuation;
+        float attenuation = 1.0; // (distance * distance);
+        vec3 radiance = vec3(1.0) * attenuation;
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, uRoughness);   
@@ -100,7 +100,7 @@ void main() {
 
         // add to outgoing radiance Lo
         Lo += (kD * uAlbedo / PI + specular) ;//* radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-    // }   
+    }   
     // vec3 color = ambient + Lo;
     // vec3 color = Lo;
 
@@ -109,13 +109,14 @@ void main() {
     vec3 color = ambient + Lo;
 
     // HDR tonemapping
-    // color = color / (color + vec3(1.0));
+    color = color / (color + vec3(1.0));
     // gamma correct
-    // color = pow(color, vec3(1.0/2.2));
+    color = pow(color, vec3(1.0/2.2));
 
     
-    gl_FragColor = vec4(vec3(  nominator * radiance), 1.0);
-    // gl_FragColor = vec4(vNormal /2.+ 1./2., 1.0);
+    // gl_FragColor = vec4(vec3(  nominator * radiance), 1.0);
+    // gl_FragColor = vec4(V /2.+ 1./2., 1.0);
     // gl_FragColor = vec4(F, 1.0);
     // gl_FragColor = vec4((normalize(V) + vec3(1.0))/2., 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }  

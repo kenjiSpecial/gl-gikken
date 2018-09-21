@@ -1,7 +1,7 @@
 import { Program } from 'tubugl-core/src/program';
 import { mat4 } from 'gl-matrix/src/gl-matrix';
 import { PerspectiveCamera } from 'tubugl-camera/src/perspectiveCamera';
-import { sphere, Sphere } from "./sphere";
+import { sphere, Sphere } from './sphere';
 
 export class Mesh {
 	/**
@@ -42,7 +42,7 @@ export class Mesh {
 		const gl = this._gl;
 
 		// console.log(Sphere());
-		let {vertices, textures, normals, indices} = Sphere();
+		let { vertices, textures, normals, indices } = Sphere();
 
 		this.positionBuffer = gl.createBuffer();
 		this.aPositionLocation = gl.getAttribLocation(this._program.id, 'position');
@@ -72,13 +72,13 @@ export class Mesh {
 		this._modelMatrixArr = [];
 		this._normalMatrixArr = [];
 
-		for(let xx = -4; xx < 5; xx++){
+		for (let xx = -4; xx < 5; xx++) {
 			this._modelMatrixArr.push([]);
 			this._normalMatrixArr.push([]);
 
-			for(let yy = -4; yy < 5; yy++){
+			for (let yy = -4; yy < 5; yy++) {
 				let xpos = 6 * xx;
-				let ypos = 6 * yy;	
+				let ypos = 6 * yy;
 
 				let modelMatrix = mat4.create();
 				let modelInverse = mat4.create();
@@ -104,7 +104,10 @@ export class Mesh {
 		const gl = this._gl;
 		this._uMmodelMatirxLocation = gl.getUniformLocation(this._program.id, 'uModelMatrix');
 		this._uViewMatirxLocation = gl.getUniformLocation(this._program.id, 'uViewMatrix');
-		this._uProjectionMatirxLocation = gl.getUniformLocation(this._program.id, 'uProjectionMatrix');
+		this._uProjectionMatirxLocation = gl.getUniformLocation(
+			this._program.id,
+			'uProjectionMatrix'
+		);
 		this._uCameraPosLocation = gl.getUniformLocation(this._program.id, 'uCameraPos');
 		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
 		this._uAlbedoLocation = gl.getUniformLocation(this._program.id, 'uAlbedo');
@@ -123,14 +126,12 @@ export class Mesh {
 	render(camera, del) {
 		const gl = this._gl;
 
-		this._time += del/1000;
+		this._time += del / 1000;
 
 		// mat4.multiply(this._mvMatrix, camera.viewMatrix, this._modelMatrix);
 		// mat4.multiply(this._mvpMatrix, camera.projectionMatrix, this._mvMatrix);
 
 		this._program.use();
-
-		
 
 		// bind position buffer
 
@@ -157,15 +158,25 @@ export class Mesh {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
 		// gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
-		gl.uniform3f(this._uLightPosLocation, 10 * Math.cos(this._time), 10 * Math.sin(this._time), 5);
+		gl.uniform3f(
+			this._uLightPosLocation,
+			10 * Math.cos(this._time),
+			10 * Math.sin(this._time),
+			5
+		);
 
 		gl.uniformMatrix4fv(this._uViewMatirxLocation, false, camera.viewMatrix);
 		gl.uniformMatrix4fv(this._uProjectionMatirxLocation, false, camera.projectionMatrix);
 
-		gl.uniform3f(this._uCameraPosLocation, camera.position.x, camera.position.y, camera.position.z);
+		console.log(this._uCameraPosLocation);
+		gl.uniform3f(
+			this._uCameraPosLocation,
+			camera.position.x,
+			camera.position.y,
+			camera.position.z
+		);
 		gl.uniform3f(this._uAlbedoLocation, 0.5, 0.0, 0.0);
 		// gl.uniform1f(this._uMetallicLocation, 0.1);
-		
 
 		// active texture
 
@@ -179,25 +190,23 @@ export class Mesh {
 			gl.uniform1i(this._uAoTexLocation, 1);
 		}
 
-
-		for(let xx = 0; xx < 9; xx++){
-			for(let yy = 0; yy < 9; yy++){
+		for (let xx = 0; xx < 9; xx++) {
+			for (let yy = 0; yy < 9; yy++) {
 				const modelMat = this._modelMatrixArr[xx][yy];
 				const normalMat = this._normalMatrixArr[xx][yy];
 				// console.log(normalMat);
 
-				gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.05);
-				gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.05);
+				gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
+				gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
 
 				// console.log(this._uMmodelMatirxLocation);
 				// console.log(this._uNormalMatrixLocation);
 
 				gl.uniformMatrix4fv(this._uMmodelMatirxLocation, false, modelMat);
 				gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, normalMat);
-				gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);	
+				gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 			}
 		}
-		
 	}
 
 	addTexture(textures) {
