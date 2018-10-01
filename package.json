@@ -13,6 +13,7 @@
     "dist00": "parcel build examples/00-lighting/index.html -d docs/00 --public-url ./  --no-source-maps",
     "01": "parcel examples/01-opengl-tutorial/index.html --no-hmr",
     "02": "parcel examples/02-opengl-tutorial/index.html --no-hmr",
+    "03": "parcel examples/03-brdf-dfg/index.html --no-hmr",
     "server": "http-server ./",
     "parseObj": "node obj-parser/parser.js"
   },

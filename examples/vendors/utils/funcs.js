@@ -29,6 +29,48 @@ export function getAjaxJson(url) {
 	return promiseObj;
 }
 
+/**
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {*} state
+ * @param {*} name
+ * @param {*} url
+ * @param {function} callback
+ */
+export function loadTexture(gl, state, name, url, callback) {
+	// state.uniforms.texture[name] = texture
+	let self = this;
+
+	function onLoadImage(image, name) {
+		return function() {
+			let texture = gl.createTexture();
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+			if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+				// Yes, it's a power of 2. Generate mips.
+				gl.generateMipmap(gl.TEXTURE_2D);
+			} else {
+				// No, it's not a power of 2. Turn of mips and set
+				// wrapping to clamp to edge
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			}
+
+			state.uniforms.textures[name] = texture;
+
+			callback();
+		};
+	}
+
+	let image = new Image();
+	image.onload = onLoadImage(image, name);
+	image.src = url;
+}
+
 export function loadTextures(gl, state, name, urls, callback) {
 	// let texture = gl.createTexture();
 	// console.log(state.uniforms);

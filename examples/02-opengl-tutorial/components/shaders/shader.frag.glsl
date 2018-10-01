@@ -11,15 +11,13 @@ uniform sampler2D uMetallicTex;
 uniform sampler2D uRoughnessTex;
   
 uniform vec3 uCameraPos;
-
 uniform vec3 uLightPos;
 
 varying vec3 vNormal;
 varying vec3 vWorldPos;
 varying vec2 vUv;
 
-vec3 getNormalFromMap()
-{
+vec3 getNormalFromMap(){
     vec3 tangentNormal = texture2D(uNormalTex, vUv).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(vWorldPos);

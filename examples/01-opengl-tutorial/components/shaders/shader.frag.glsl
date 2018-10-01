@@ -63,7 +63,7 @@ void main() {
     float metallic = uMetallic;
     float roughness = uRoughness;
     vec3 albedo = uAlbedo;
-    // F0 = mix(F0, uAlbedo, metallic);
+    F0 = mix(F0, uAlbedo, metallic);
 
     // reflectance equation
     vec3 Lo = vec3(0.0);

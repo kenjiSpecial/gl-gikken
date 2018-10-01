@@ -17,13 +17,10 @@ varying vec3 vWorldPos;
 
 void main() {
     vUv = uv;
-    // vNormal = normal;
     vNormal =  mat3(uModelMatrix) * normal;
-    // Normal = mat3(uModelMatrix) * aNormal;
     
-     vec4 pos = uModelMatrix * position;
-     vWorldPos = vec3(uModelMatrix * position);
-//   v_Position = vec3(pos.xyz) / pos.w;
+    vec4 pos = uModelMatrix * position;
+    vWorldPos = vec3(uModelMatrix * position);
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
 }

@@ -240,3 +240,9 @@ export let specualarImageUrls = [
 		specularBack9ImgUrl
 	]
 ];
+
+import hangarHdrImgUrl from '../../assets/images/hangar_hdr.jpg';
+
+export let hdr = {
+	hangarImgUrl: hangarHdrImgUrl
+};
