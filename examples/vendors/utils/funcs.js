@@ -37,7 +37,7 @@ export function getAjaxJson(url) {
  * @param {*} url
  * @param {function} callback
  */
-export function loadTexture(gl, state, name, url, callback) {
+export function loadTexture(gl, state, name, url, callback, isFlip = false) {
 	// state.uniforms.texture[name] = texture
 	let self = this;
 
@@ -46,7 +46,7 @@ export function loadTexture(gl, state, name, url, callback) {
 			let texture = gl.createTexture();
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
-			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, isFlip);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
 
 			if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
@@ -198,4 +198,77 @@ export function loadCubeMap(gl, state, callback, uniformName, urls, num = 0, mip
 	};
 
 	return 1;
+}
+
+/**
+ *
+ * create empty texture
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {*} targetTextureWidth
+ * @param {*} targetTextureHeight
+ */
+export function createTexture(gl, textureWidth, textureHeight) {
+	const targetTexture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+	{
+		// define size and format of level 0
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const border = 0;
+		const format = gl.RGBA;
+		const type = gl.UNSIGNED_BYTE;
+		const data = null;
+		gl.texImage2D(
+			gl.TEXTURE_2D,
+			level,
+			internalFormat,
+			textureWidth,
+			textureHeight,
+			border,
+			format,
+			type,
+			data
+		);
+
+		// set the filtering so we don't need mips
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	}
+
+	return targetTexture;
+}
+
+export function createEmptyCubemap(gl, textureWidth, textureHeight) {
+	let texture = gl.createTexture();
+
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+	for (let ii = 0; ii < 6; ii++) {
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const border = 0;
+		const format = gl.RGBA;
+		const type = gl.UNSIGNED_BYTE;
+		const data = null;
+		gl.texImage2D(
+			gl.TEXTURE_CUBE_MAP_POSITIVE_X + ii,
+			level,
+			internalFormat,
+			textureWidth,
+			textureHeight,
+			border,
+			format,
+			type,
+			data
+		);
+	}
+
+	return texture;
 }

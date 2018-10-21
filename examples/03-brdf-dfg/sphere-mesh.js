@@ -1,5 +1,6 @@
 import { Mesh } from './mesh';
 import { getSphere } from './sphere';
+import { Program } from 'tubugl-core/src/program';
 
 export class SphereMesh extends Mesh {
 	/**
@@ -16,11 +17,11 @@ export class SphereMesh extends Mesh {
 	constructor(params) {
 		params.data = getSphere();
 		super(params);
+		// this.createIrraianceProgram();
 	}
 
 	_createBuffer(data) {
 		super._createBuffer(data);
-		console.log(data);
 	}
 
 	getUniformLocation() {
@@ -46,6 +47,7 @@ export class SphereMesh extends Mesh {
 	}
 
 	updateUniforms(gl, camera) {
+		// console.log(this._uViewMatrixLocation);
 		gl.uniformMatrix4fv(this._uViewMatrixLocation, false, camera.viewMatrix);
 		gl.uniformMatrix4fv(this._uProjectionMatrixLocation, false, camera.projectionMatrix);
 		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, this._normalMatrix);
@@ -60,6 +62,4 @@ export class SphereMesh extends Mesh {
 	setTexture(bgTexture) {
 		this.bgTexture = bgTexture;
 	}
-
-	// render(camera) {}
 }

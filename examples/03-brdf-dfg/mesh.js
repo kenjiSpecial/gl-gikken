@@ -13,14 +13,8 @@ export class Mesh {
 	 */
 	constructor(params = {}) {
 		this._gl = params.gl;
-		this._typeId = 0;
-		this._typeName = 'distribution';
-		this._light = {
-			x: 0,
-			y: 0,
-			z: -1
-		};
-		this._roughness = 0.1;
+		this._textureType = 'brick';
+		this._time = 0;
 
 		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
 		this._createBuffer(params.data);
@@ -58,11 +52,13 @@ export class Mesh {
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.normals), gl.STATIC_DRAW);
 		}
 
+		// this.aUvLocation = gl.getAttribLocation(this._program.id, 'uv');
 		this.aUvLocation = gl.getAttribLocation(this._program.id, 'uv');
 		if (this.aUvLocation > -1) {
 			this.uvBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.textcoords), gl.STATIC_DRAW);
+			// console.log(data.textcoords);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.texcoords), gl.STATIC_DRAW);
 		}
 
 		this.indexBuffer = gl.createBuffer();
@@ -82,16 +78,19 @@ export class Mesh {
 	}
 
 	getUniformLocation() {
-		const gl = this._gl;
-		this._uModelMatirxLocation = gl.getUniformLocation(this._program.id, 'uModelMatrix');
-		this._uMVPMatirxLocation = gl.getUniformLocation(this._program.id, 'uMVPMatrix');
-		this._uTypeLocation = gl.getUniformLocation(this._program.id, 'uType');
-		this._uNormalMatrixLocation = gl.getUniformLocation(this._program.id, 'uNormalMatrix');
-		this._uLightDirLocation = gl.getUniformLocation(this._program.id, 'uLightDir');
-		this._uCameraPosLocation = gl.getUniformLocation(this._program.id, 'uCameraPos');
-		this._uRoughnessLocation = gl.getUniformLocation(this._program.id, 'uRoughness');
+		this.uAlbedoTexLocation = this._program.uniform.uAlbedoTex.location;
+		this.uAoTexLocation = this._program.uniform.uAoTex.location;
+		this.uNormalTexLocation = this._program.uniform.uNormalTex.location;
+		this.uRoughnessTexLocation = this._program.uniform.uRoughnessTex.location;
+		this.uMetallicTexLocation = this._program.uniform.uMetallicTex.location;
 
-		// console.log(object);
+		this.uLightPosLocation = this._program.uniform.uLightPos.location;
+		this.uCameraPosLocation = this._program.uniform.uCameraPos.location;
+
+		this.uModelMatrixLocation = this._program.uniform.uModelMatrix.location;
+		this.uViewMatrixLocation = this._program.uniform.uViewMatrix.location;
+		this.uProjectionMatrixLocation = this._program.uniform.uProjectionMatrix.location;
+		this.uNormalMatrixLocation = this._program.uniform.uNormalMatrix.location;
 	}
 
 	/**
@@ -123,8 +122,10 @@ export class Mesh {
 		}
 
 		// bind uv buffer
+		// console.log(this.aUvLocation);
 		if (this.aUvLocation > -1) {
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+			// console.log(this.aUvLocation);
 			gl.vertexAttribPointer(this.aUvLocation, 2, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(this.aUvLocation);
 		}
@@ -138,6 +139,7 @@ export class Mesh {
 	 * @param {Camera} camera
 	 */
 	updateUniforms(gl, camera) {
+		/**
 		gl.uniformMatrix4fv(this._uMVPMatirxLocation, false, this._mvpMatrix);
 		gl.uniformMatrix4fv(this._uModelMatirxLocation, false, this._modelMatrix);
 		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, this._normalMatrix);
@@ -149,7 +151,59 @@ export class Mesh {
 			camera.position.z
 		);
 		gl.uniform3f(this._uLightDirLocation, this._light.x, this._light.y, this._light.z);
-		gl.uniform1f(this._uRoughnessLocation, this._roughness);
+		gl.uniform1f(this._uRoughnessLocation, this._roughness); */
+
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures[this._textureType].albedo);
+		gl.uniform1i(this.uAlbedoTexLocation, 0);
+		// console.log(this.textures[this._textureType].albedo);
+
+		if (this.uAoTexLocation) {
+			gl.activeTexture(gl.TEXTURE1);
+			gl.bindTexture(gl.TEXTURE_2D, this.textures[this._textureType].ao);
+			gl.uniform1i(this.uAoTexLocation, 1);
+		}
+
+		if (this.uNormalTexLocation) {
+			gl.activeTexture(gl.TEXTURE2);
+			gl.bindTexture(gl.TEXTURE_2D, this.textures[this._textureType].normal);
+			gl.uniform1i(this.uNormalTexLocation, 2);
+		}
+
+		if (this.uRoughnessTexLocation) {
+			gl.activeTexture(gl.TEXTURE3);
+			gl.bindTexture(gl.TEXTURE_2D, this.textures[this._textureType].roughness);
+			gl.uniform1i(this.uRoughnessTexLocation, 3);
+		}
+
+		if (this.uMetallicTexLocation) {
+			gl.activeTexture(gl.TEXTURE4);
+			gl.bindTexture(gl.TEXTURE_2D, this.textures[this._textureType].metallic);
+			gl.uniform1i(this.uMetallicTexLocation, 4);
+		}
+
+		const modelMat = this._modelMatrix; //Arr[xx][yy];
+		const normalMat = this._normalMatrix; //Arr[xx][yy];
+
+		gl.uniformMatrix4fv(this.uModelMatrixLocation, false, modelMat);
+		gl.uniformMatrix4fv(this.uNormalMatrixLocation, false, normalMat);
+
+		gl.uniform3f(
+			this.uLightPosLocation,
+			20 * Math.cos(this._time),
+			20 * Math.sin(this._time),
+			10
+		);
+
+		gl.uniformMatrix4fv(this.uViewMatrixLocation, false, camera.viewMatrix);
+		gl.uniformMatrix4fv(this.uProjectionMatrixLocation, false, camera.projectionMatrix);
+
+		gl.uniform3f(
+			this.uCameraPosLocation,
+			camera.position.x,
+			camera.position.y,
+			camera.position.z
+		);
 	}
 
 	updateDrawStatus() {
@@ -189,6 +243,7 @@ export class Mesh {
 	 */
 	render(camera) {
 		const gl = this._gl;
+		this._time += 1 / 60;
 
 		this.updateCameraMatrix(camera);
 
@@ -206,15 +261,21 @@ export class Mesh {
 	}
 
 	addGui(gui) {
-		gui.add(this, '_typeName', ['distribution', 'geometry', 'fresnel']).onChange(() => {
-			if (this._typeName == 'distribution') this._typeId = 0;
-			else if (this._typeName == 'geometry') this._typeId = 1;
-			else if (this._typeName == 'fresnel') this._typeId = 2;
-		});
-		gui.add(this, '_roughness', 0, 1).name('roughness');
-		let lightDirectionFolder = gui.addFolder('light direction');
-		lightDirectionFolder.add(this._light, 'x', -1, 1).step(0.01);
-		lightDirectionFolder.add(this._light, 'y', -1, 1).step(0.01);
-		lightDirectionFolder.add(this._light, 'z', -1, 1).step(0.01);
+		// gui.add(this, '_typeName', ['distribution', 'geometry', 'fresnel']).onChange(() => {
+		// 	if (this._typeName == 'distribution') this._typeId = 0;
+		// 	else if (this._typeName == 'geometry') this._typeId = 1;
+		// 	else if (this._typeName == 'fresnel') this._typeId = 2;
+		// });
+		// gui.add(this, '_roughness', 0, 1).name('roughness');
+		// let lightDirectionFolder = gui.addFolder('light direction');
+		// lightDirectionFolder.add(this._light, 'x', -1, 1).step(0.01);
+		// lightDirectionFolder.add(this._light, 'y', -1, 1).step(0.01);
+		// lightDirectionFolder.add(this._light, 'z', -1, 1).step(0.01);
+
+		gui.add(this, '_textureType', ['fabric', 'chipped', 'brick']);
+	}
+
+	addTexture(textures) {
+		this.textures = textures;
 	}
 }

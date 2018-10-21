@@ -16,7 +16,6 @@ uniform vec3 uMaterialColor;
 uniform bool uIsDiffuseColor;
 uniform bool uIsSpecularColor;
 
-
 varying vec3 vNormal;
 varying vec3 vPosition;
 

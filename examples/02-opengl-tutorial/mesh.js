@@ -68,7 +68,6 @@ export class Mesh {
 	}
 
 	_createMatrix() {
-		
 		let xpos = 0;
 		let ypos = 8;
 
@@ -180,20 +179,19 @@ export class Mesh {
 			gl.uniform1i(this._uAoTexLocation, 1);
 		}
 
-		if(this._uNormalTexLocation){
+		if (this._uNormalTexLocation) {
 			gl.activeTexture(gl.TEXTURE2);
 			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].normal);
 			gl.uniform1i(this._uNormalTexLocation, 2);
 		}
 
-
-		if(this._uRoughnessTexLocation){
+		if (this._uRoughnessTexLocation) {
 			gl.activeTexture(gl.TEXTURE3);
 			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].roughness);
 			gl.uniform1i(this._uRoughnessTexLocation, 3);
 		}
 
-		if(this._uMetallicTexLocation){
+		if (this._uMetallicTexLocation) {
 			gl.activeTexture(gl.TEXTURE4);
 			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].metallic);
 			gl.uniform1i(this._uMetallicTexLocation, 4);
@@ -201,15 +199,15 @@ export class Mesh {
 
 		// for (let xx = 0; xx < 9; xx++) {
 		// 	for (let yy = 0; yy < 9; yy++) {
-				const modelMat = this._modelMatrix; //Arr[xx][yy];
-				const normalMat = this._normalMatrix; //Arr[xx][yy];
+		const modelMat = this._modelMatrix; //Arr[xx][yy];
+		const normalMat = this._normalMatrix; //Arr[xx][yy];
 
-				// gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
-				// gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
+		// gl.uniform1f(this._uRoughnessLocation, 0.1 * xx + 0.1);
+		// gl.uniform1f(this._uMetallicLocation, 0.1 * yy + 0.1);
 
-				gl.uniformMatrix4fv(this._uMmodelMatirxLocation, false, modelMat);
-				gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, normalMat);
-				gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
+		gl.uniformMatrix4fv(this._uMmodelMatirxLocation, false, modelMat);
+		gl.uniformMatrix4fv(this._uNormalMatrixLocation, false, normalMat);
+		gl.drawElements(gl.TRIANGLES, this._cnt, gl.UNSIGNED_INT, 0);
 		// 	}
 		// }
 	}
@@ -219,8 +217,7 @@ export class Mesh {
 		console.log(this._textures);
 	}
 
-	addGui(gui){
+	addGui(gui) {
 		gui.add(this, '_textureType', ['fabric', 'chipped', 'brick']);
 	}
-
 }
