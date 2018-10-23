@@ -14,6 +14,8 @@ uniform sampler2D uNormalTex;
 uniform sampler2D uMetallicTex;
 uniform sampler2D uRoughnessTex;
 
+uniform samplerCube uIrradianceMap;
+
 uniform vec3 uCameraPos;
 uniform vec3 uLightPos;
 
@@ -73,6 +75,14 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
+// ----------------------------------------------------------------------------
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}   
+
 // ----------------------------------------------------------------------------
 
 void main() {
@@ -133,7 +143,13 @@ void main() {
     // vec3 color = ambient + Lo;
     // vec3 color = Lo;
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = textureCube(uIrradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
+    // vec3 ambient = vec3(0.03) * albedo * ao;
 
     vec3 color = Lo + ambient;
 

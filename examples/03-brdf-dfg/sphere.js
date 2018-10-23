@@ -38,7 +38,7 @@ export function getSphere(radius = 1, latitudeBands = 30, longitudeBands = 30) {
 
 	return {
 		verts: vertices,
-		textcoords: textures,
+		texcoords: textures,
 		normals: normals,
 		indices: indices
 	};

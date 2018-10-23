@@ -20,7 +20,7 @@ import { hdr } from '../vendors/utils/enviroment-maps';
 import { SkyBox } from './skybox.js';
 import { MaterialBallMesh } from './material-ball-mesh';
 
-import { chippedImagesUrls, fabricImagesUrls, brickImagesUrls } from '../vendors/utils/textures';
+import { chippedImagesUrls, fabricImagesUrls, brickImagesUrls, dirtyGoldImagesUrls } from '../vendors/utils/textures';
 
 export default class App {
 	constructor(params = {}) {
@@ -117,7 +117,7 @@ export default class App {
 
 	_createCamera() {
 		this._camera = new PerspectiveCamera(this._width, this._height, 45, 0.01, 10000);
-		this._camera.position.z = 30;
+		this._camera.position.z = 60;
 		this._camera.lookAt([0, 0, 0]);
 	}
 
@@ -131,7 +131,7 @@ export default class App {
 		this._grid = new Grid(this.gl);
 	}
 	loadTextures() {
-		this.textureCnt = 4;
+		this.textureCnt = 5;
 
 		loadTexture(
 			this.gl,
@@ -166,6 +166,14 @@ export default class App {
 			this.onLoadTextureComplete.bind(this)
 		);
 
+		loadTextures(
+			this.gl,
+			this.glState,
+			'dirtyGold',
+			dirtyGoldImagesUrls,
+			this.onLoadTextureComplete.bind(this)
+		);
+
 		// this.TEXTURE_TOTAL_CNT = 4;
 	}
 
@@ -177,6 +185,8 @@ export default class App {
 		this._mesh.addTexture(this.glState.uniforms.textures);
 
 		this.createSkyBox();
+		console.log(this.skybox.irradianceCubemap);
+		this._mesh.addIrradianceCubemap(this.skybox.irradianceCubemap);
 
 		this.isLoop = true;
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);

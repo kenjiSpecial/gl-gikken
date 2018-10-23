@@ -1,6 +1,8 @@
 import vertexShaderSrc from './components/shaders/skybox/shader.vert.glsl';
 import fragmentShaderSrc from './components/shaders/skybox/shader.frag.glsl';
 
+import prefilterFragmentSrc from './components/shaders/skybox/prefilter.frag.glsl';
+
 import layoutVertexShaderSrc from './components/shaders/skybox/layout.vert.glsl';
 import layoutFragmentShaderSrc from './components/shaders/skybox/layout.frag.glsl';
 
@@ -27,8 +29,23 @@ export class SkyBox {
 		this.createMatrix();
 		this.getUniformLocation();
 
-		this.captureView(params.sphereMesh);
+		let viewArray = [
+			[[1, 0, 0], [0, -1, 0]],
+			[[-1, 0, 0], [0, -1, 0]],
+			[[0, 1, 0], [0, 0, 1]],
+			[[0, -1, 0], [0, 0, -1]],
+			[[0, 0, 1], [0, -1, 0]],
+			[[0, 0, -1], [0, -1, 0]]
+		];
+
+		this.captureView(params.sphereMesh, viewArray);
+		this.createIrradianceCubemapTexture(viewArray);
+		this.createEnvViewMapTexture(viewArray);
+
+		this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
 	}
+
+
 
 	createProgram() {
 		const gl = this._gl;
@@ -40,19 +57,12 @@ export class SkyBox {
 		);
 	}
 
-	captureView(sphereMesh) {
+	captureView(sphereMesh, viewArray) {
 		const gl = this._gl;
 
 		this._textures = [];
 
-		let viewArray = [
-			[[1, 0, 0], [0, -1, 0]],
-			[[-1, 0, 0], [0, -1, 0]],
-			[[0, 1, 0], [0, 0, 1]],
-			[[0, -1, 0], [0, 0, -1]],
-			[[0, 0, 1], [0, -1, 0]],
-			[[0, 0, -1], [0, -1, 0]]
-		];
+		
 
 		const targetTextureWidth = 1024;
 		const targetTextureHeight = 1024;
@@ -90,14 +100,21 @@ export class SkyBox {
 		let duration = Date.now() - startTime;
 		console.log('rendering cubemap: ', duration);
 
+	}
+
+	createIrradianceCubemapTexture(viewArray){
+		const gl = this._gl;
 		const textureSize = 32;
 
-		const framebuffer2 = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer2);
+		let viewMatrix = mat4.create();
+		let projectionMatrix = mat4.create();
+		const level = 0;
+		const framebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
 		this.irradianceCubemap = createEmptyCubemap(gl, textureSize, textureSize);
 
-		startTime = Date.now();
+		let startTime = Date.now();
 		for (let ii = 0; ii < viewArray.length; ii++) {
 			mat4.lookAt(viewMatrix, [0, 0, 0], viewArray[ii][0], viewArray[ii][1]);
 
@@ -120,10 +137,21 @@ export class SkyBox {
 				projectionMatrix
 			});
 		}
-		duration = Date.now() - startTime;
-		console.log('rendering irradiance convolution cubemap: ', duration);
 
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		let duration = Date.now() - startTime;
+
+		console.log('rendering irradiance convolution cubemap: ', duration);	
+	}
+
+	createEnvViewMapTexture(viewArray){
+		const gl = this._gl;
+		let textureSize = 256;
+
+		let viewMatrix = mat4.create();
+		let projectionMatrix = mat4.create();
+		for()
+
+		
 	}
 
 	makeBuffer() {
@@ -345,9 +373,6 @@ export class SkyBox {
 
 		gl.uniform1i(this.layout.location.uTexture, 0);
 
-		// console.log(this.layout.location.uTexture);
-		// gl.drawElements(gl.TRIANGLES, this.layout.cnt, gl.UNSIGNED_INT, 0);
-		// gl.drawArrays(gl.TRIANGLE)
 		gl.drawArrays(gl.TRIANGLES, 0, this.layout.cnt);
 	}
 

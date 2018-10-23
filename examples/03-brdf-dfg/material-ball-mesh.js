@@ -14,11 +14,14 @@ export class MaterialBallMesh extends Mesh {
 	 *
 	 */
 	constructor(params) {
+		params.textureType = 'dirtyGold';
+
 		super(params);
-		// this.createIrraianceProgram();
 	}
 
 	addGui(gui) {
 		const materialBallGui = gui.addFolder('materialBall');
+		materialBallGui.add(this, '_textureType', ['fabric', 'chipped', 'brick', 'dirtyGold']);
+		materialBallGui.open();
 	}
 }

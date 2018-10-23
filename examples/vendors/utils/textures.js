@@ -80,3 +80,17 @@ export let fabricImagesUrls = [
 		fabricMetalnessImgUrl,
 		fabricRoughnesslImgUrl
 ];
+
+import dirtyGoldAOImgUrl from '../../assets/images/material/dirty-gold/ao.png';
+import dirtyGoldAlbedoImgUrl from '../../assets/images/material/dirty-gold/albedo.png';
+import dirtyGoldNormalImgUrl from '../../assets/images/material/dirty-gold/normal.png';
+import dirtyGoldMetalnessImgUrl from '../../assets/images/material/dirty-gold/metallic.png';
+import dirtyGoldRoughnesslImgUrl from '../../assets/images/material/dirty-gold/roughness.png';
+
+export let dirtyGoldImagesUrls = [	
+		dirtyGoldAOImgUrl,
+		dirtyGoldAlbedoImgUrl,
+		dirtyGoldNormalImgUrl,
+		dirtyGoldMetalnessImgUrl,
+		dirtyGoldRoughnesslImgUrl
+];

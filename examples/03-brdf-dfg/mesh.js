@@ -13,8 +13,9 @@ export class Mesh {
 	 */
 	constructor(params = {}) {
 		this._gl = params.gl;
-		this._textureType = 'brick';
+		this._textureType = params.textureType ? params.textureType : 'brick';
 		this._time = 0;
+		
 
 		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
 		this._createBuffer(params.data);
@@ -57,7 +58,6 @@ export class Mesh {
 		if (this.aUvLocation > -1) {
 			this.uvBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-			// console.log(data.textcoords);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.texcoords), gl.STATIC_DRAW);
 		}
 
@@ -83,6 +83,8 @@ export class Mesh {
 		this.uNormalTexLocation = this._program.uniform.uNormalTex.location;
 		this.uRoughnessTexLocation = this._program.uniform.uRoughnessTex.location;
 		this.uMetallicTexLocation = this._program.uniform.uMetallicTex.location;
+
+		this.uIrradianceCubemapLocation = this._program.uniform.uIrradianceMap.location;
 
 		this.uLightPosLocation = this._program.uniform.uLightPos.location;
 		this.uCameraPosLocation = this._program.uniform.uCameraPos.location;
@@ -182,6 +184,10 @@ export class Mesh {
 			gl.uniform1i(this.uMetallicTexLocation, 4);
 		}
 
+		gl.activeTexture(gl.TEXTURE5);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.irradianceCubemap);
+		gl.uniform1i(this.uIrradianceCubemapLocation, 5);
+
 		const modelMat = this._modelMatrix; //Arr[xx][yy];
 		const normalMat = this._normalMatrix; //Arr[xx][yy];
 
@@ -261,21 +267,15 @@ export class Mesh {
 	}
 
 	addGui(gui) {
-		// gui.add(this, '_typeName', ['distribution', 'geometry', 'fresnel']).onChange(() => {
-		// 	if (this._typeName == 'distribution') this._typeId = 0;
-		// 	else if (this._typeName == 'geometry') this._typeId = 1;
-		// 	else if (this._typeName == 'fresnel') this._typeId = 2;
-		// });
-		// gui.add(this, '_roughness', 0, 1).name('roughness');
-		// let lightDirectionFolder = gui.addFolder('light direction');
-		// lightDirectionFolder.add(this._light, 'x', -1, 1).step(0.01);
-		// lightDirectionFolder.add(this._light, 'y', -1, 1).step(0.01);
-		// lightDirectionFolder.add(this._light, 'z', -1, 1).step(0.01);
-
-		gui.add(this, '_textureType', ['fabric', 'chipped', 'brick']);
+		let meshGuiFolder = gui.addFolder('mesh');
 	}
 
 	addTexture(textures) {
 		this.textures = textures;
+	}
+
+	addIrradianceCubemap(irradianceCubemap){
+		this.irradianceCubemap = irradianceCubemap;
+		console.log(this.irradianceCubemap);
 	}
 }
