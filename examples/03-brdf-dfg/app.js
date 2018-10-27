@@ -20,7 +20,12 @@ import { hdr } from '../vendors/utils/enviroment-maps';
 import { SkyBox } from './skybox.js';
 import { MaterialBallMesh } from './material-ball-mesh';
 
-import { chippedImagesUrls, fabricImagesUrls, brickImagesUrls, dirtyGoldImagesUrls } from '../vendors/utils/textures';
+import {
+	chippedImagesUrls,
+	fabricImagesUrls,
+	brickImagesUrls,
+	dirtyGoldImagesUrls
+} from '../vendors/utils/textures';
 
 export default class App {
 	constructor(params = {}) {
@@ -35,13 +40,13 @@ export default class App {
 		this._height = params.height ? params.height : window.innerHeight;
 
 		this.canvas = document.createElement('canvas');
-		this.gl = this.canvas.getContext('webgl');
+		this.gl = this.canvas.getContext('webgl2');
 
 		this.glState = {
-			hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
-			hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
-			hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
-			hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
+			// hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
+			// hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
+			// hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
+			// hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
 			uniforms: {
 				textures: {}
 			}
@@ -187,6 +192,8 @@ export default class App {
 		this.createSkyBox();
 		console.log(this.skybox.irradianceCubemap);
 		this._mesh.addIrradianceCubemap(this.skybox.irradianceCubemap);
+		this._mesh.addPrefilterCubeMap(this.skybox.envmapCubemap);
+		this._mesh.addBrdfLUTTexture(this.skybox.lTUtexture);
 
 		this.isLoop = true;
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);

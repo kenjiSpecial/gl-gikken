@@ -1,12 +1,11 @@
-#extension GL_EXT_shader_texture_lod : enable
-#extension GL_OES_standard_derivatives : enable
+#version 300 es
 
 #define PI 3.1415
 precision highp float;
 
-varying vec3 vNormal;
-varying vec3 vWorldPos;
-varying vec2 vUv;
+in vec3 vNormal;
+in vec3 vWorldPos;
+in vec2 vUv;
 
 uniform sampler2D uAlbedoTex;
 uniform sampler2D uAoTex;
@@ -15,13 +14,17 @@ uniform sampler2D uMetallicTex;
 uniform sampler2D uRoughnessTex;
 
 uniform samplerCube uIrradianceMap;
+uniform samplerCube uPrefilterMap;
+uniform sampler2D uBrdfLUTTex;
 
 uniform vec3 uCameraPos;
 uniform vec3 uLightPos;
 
+out vec4 myOutputColor;
+
 
 vec3 getNormalFromMap(){
-    vec3 tangentNormal = texture2D(uNormalTex, vUv).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture(uNormalTex, vUv).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(vWorldPos);
     vec3 Q2  = dFdy(vWorldPos);
@@ -86,18 +89,19 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 
 void main() {
-    vec3 albedo     = texture2D(uAlbedoTex, vUv).rgb; //pow(texture2D(uColorTex, vUv).rgb, 2.2);
+    vec3 albedo     = texture(uAlbedoTex, vUv).rgb; //pow(texture2D(uColorTex, vUv).rgb, 2.2);
     albedo.r = pow(albedo.r, 2.2);
     albedo.g = pow(albedo.g, 2.2);
     albedo.b = pow(albedo.b, 2.2);
 
     vec3 normal     = getNormalFromMap();
-    float metallic  = texture2D(uMetallicTex, vUv).r;
-    float roughness = texture2D(uRoughnessTex, vUv).r;
-    float ao        = texture2D(uAoTex, vUv).r;
+    float metallic  = texture(uMetallicTex, vUv).r;
+    float roughness = texture(uRoughnessTex, vUv).r;
+    float ao        = texture(uAoTex, vUv).r;
 
-    vec3 N = normalize(vNormal);
+    vec3 N = normal; //normalize(vNormal);
     vec3 V = normalize(uCameraPos - vWorldPos);
+    vec3 R = reflect(-V, N); 
 
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
@@ -142,13 +146,23 @@ void main() {
     }   
     // vec3 color = ambient + Lo;
     // vec3 color = Lo;
+    // ambient lighting (we now use IBL as the ambient term)
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 
-    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kS = F;
     vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	  
-    vec3 irradiance = textureCube(uIrradianceMap, N).rgb;
+    kD *= 1.0 - metallic;
+
+    vec3 irradiance = texture(uIrradianceMap, N).rgb;
     vec3 diffuse      = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 5.0;
+    vec3 prefilteredColor = textureLod(uPrefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(uBrdfLUTTex, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
     // vec3 ambient = vec3(0.03) * albedo * ao;
 
     vec3 color = Lo + ambient;
@@ -158,7 +172,7 @@ void main() {
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
  
-    gl_FragColor = vec4(color, 1.0);
+    myOutputColor = vec4(color, 1.0);
     // gl_FragColor = vec4(albedo, 1.0);
     // gl_FragColor = vec4(vUv, 0.0, 1.0);
 }  

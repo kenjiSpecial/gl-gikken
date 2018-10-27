@@ -9,10 +9,16 @@ import layoutFragmentShaderSrc from './components/shaders/skybox/layout.frag.gls
 import irradianceCovolutionVertexShaderSrc from './components/shaders/skybox/irradiance-convolution.vert.glsl';
 import irradianceCovolutionFragmentShaderSrc from './components/shaders/skybox/irradiance-convolution.frag.glsl';
 
+import prefilterVertexShaderSrc from './components/shaders/skybox/prefilter.vert.glsl';
+import prefilterFragmentShaderSrc from './components/shaders/skybox/prefilter.frag.glsl';
+
+import brdfVertShaderSrc from './components/shaders/skybox/brdf.vert.glsl';
+import brdfFragShaderSrc from './components/shaders/skybox/brdf.frag.glsl';
+
 import { Program } from 'tubugl-core/src/program';
 import { mat4 } from 'gl-matrix/src/gl-matrix';
-import { createSimpleBox } from '../vendors/utils/generator';
-import { createEmptyCubemap } from '../vendors/utils/funcs';
+import { createSimpleBox, createSimplePlane } from '../vendors/utils/generator';
+import { createEmptyCubemap, createEmptyLodCubemap, createTexture } from '../vendors/utils/funcs';
 
 export class SkyBox {
 	/**
@@ -41,11 +47,10 @@ export class SkyBox {
 		this.captureView(params.sphereMesh, viewArray);
 		this.createIrradianceCubemapTexture(viewArray);
 		this.createEnvViewMapTexture(viewArray);
+		this.createLTUTexture();
 
 		this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
 	}
-
-
 
 	createProgram() {
 		const gl = this._gl;
@@ -55,14 +60,18 @@ export class SkyBox {
 			irradianceCovolutionVertexShaderSrc,
 			irradianceCovolutionFragmentShaderSrc
 		);
+		this.prefilterProgram = new Program(
+			gl,
+			prefilterVertexShaderSrc,
+			prefilterFragmentShaderSrc
+		);
+		this.brdfProgram = new Program(gl, brdfVertShaderSrc, brdfFragShaderSrc);
 	}
 
 	captureView(sphereMesh, viewArray) {
 		const gl = this._gl;
 
 		this._textures = [];
-
-		
 
 		const targetTextureWidth = 1024;
 		const targetTextureHeight = 1024;
@@ -99,10 +108,9 @@ export class SkyBox {
 		}
 		let duration = Date.now() - startTime;
 		console.log('rendering cubemap: ', duration);
-
 	}
 
-	createIrradianceCubemapTexture(viewArray){
+	createIrradianceCubemapTexture(viewArray) {
 		const gl = this._gl;
 		const textureSize = 32;
 
@@ -113,7 +121,7 @@ export class SkyBox {
 		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
 		this.irradianceCubemap = createEmptyCubemap(gl, textureSize, textureSize);
-
+		mat4.perspective(projectionMatrix, (90 / 180) * Math.PI, 1, 0.1, 10);
 		let startTime = Date.now();
 		for (let ii = 0; ii < viewArray.length; ii++) {
 			mat4.lookAt(viewMatrix, [0, 0, 0], viewArray[ii][0], viewArray[ii][1]);
@@ -140,18 +148,125 @@ export class SkyBox {
 
 		let duration = Date.now() - startTime;
 
-		console.log('rendering irradiance convolution cubemap: ', duration);	
+		console.log('rendering irradiance convolution cubemap: ', duration);
 	}
 
-	createEnvViewMapTexture(viewArray){
+	createEnvViewMapTexture(viewArray) {
 		const gl = this._gl;
 		let textureSize = 256;
 
 		let viewMatrix = mat4.create();
 		let projectionMatrix = mat4.create();
-		for()
+		const maxMipLevels = 9;
+		const depthBuffer = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
 
-		
+		const framebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		this.envmapCubemap = createEmptyLodCubemap(gl, textureSize, textureSize, 0, maxMipLevels);
+
+		mat4.perspective(projectionMatrix, (90 / 180) * Math.PI, 1, 0.1, 10);
+		const attachmentPoint = gl.COLOR_ATTACHMENT0;
+		for (let mip = 0; mip < maxMipLevels; mip++) {
+			const mipWidth = textureSize * Math.pow(0.5, mip);
+			const mipHeight = textureSize * Math.pow(0.5, mip);
+
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, mipWidth, mipHeight);
+			gl.framebufferRenderbuffer(
+				gl.FRAMEBUFFER,
+				gl.DEPTH_ATTACHMENT,
+				gl.RENDERBUFFER,
+				depthBuffer
+			);
+			gl.viewport(0, 0, mipWidth, mipHeight);
+			const roughness = mip / (maxMipLevels - 1);
+			console.log('mipWidth', mipWidth, 'roughness', roughness, 'mip', mip);
+
+			for (let ii = 0; ii < viewArray.length; ii++) {
+				mat4.lookAt(viewMatrix, [0, 0, 0], viewArray[ii][0], viewArray[ii][1]);
+				gl.framebufferTexture2D(
+					gl.FRAMEBUFFER,
+					attachmentPoint,
+					gl.TEXTURE_CUBE_MAP_POSITIVE_X + ii,
+					this.envmapCubemap,
+					mip
+				);
+
+				gl.clearColor(0, 0, 0, 1);
+				gl.enable(gl.DEPTH_TEST);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				this.prefilterProgram.use();
+
+				gl.enable(gl.CULL_FACE);
+				gl.cullFace(gl.FRONT);
+
+				const attributePositionLocation = this.prefilterProgram.attrib.position.location;
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+				gl.vertexAttribPointer(attributePositionLocation, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(attributePositionLocation);
+
+				gl.uniformMatrix4fv(
+					this.prefilterProgram.uniform.uViewMatrix.location,
+					false,
+					viewMatrix
+				);
+
+				gl.uniformMatrix4fv(
+					this.prefilterProgram.uniform.uProjectionMatrix.location,
+					false,
+					projectionMatrix
+				);
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._cubemap);
+				gl.uniform1i(this.prefilterProgram.uniform.uEnvironmentMap.location, 0);
+
+				gl.uniform1f(this.prefilterProgram.uniform.roughness.location, roughness);
+
+				gl.drawArrays(gl.TRIANGLES, 0, this._cnt);
+			}
+		}
+
+		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+	}
+
+	createLTUTexture() {
+		console.log('createLTUTextures');
+		const { positions, uvs } = createSimplePlane(2, 2);
+		const textureSize = 256;
+
+		const gl = this._gl;
+		gl.viewport(0, 0, textureSize, textureSize);
+		this.lTUtexture = createTexture(gl, textureSize, textureSize);
+
+		const framebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+		const attachmentPoint = gl.COLOR_ATTACHMENT0;
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, this.lTUtexture, 0);
+
+		this.brdfProgram.use();
+
+		this.vao = gl.create;
+		const positionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(0);
+
+		const uvBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
+		gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(1);
+
+		gl.clearColor(0, 0, 0, 1);
+		gl.enable(gl.DEPTH_TEST);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.disable(gl.CULL_FACE);
+
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	}
 
 	makeBuffer() {
@@ -222,6 +337,10 @@ export class SkyBox {
 		gl.vertexAttribPointer(this.aPositionLocation, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.aPositionLocation);
 
+		// gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		// gl.vertexAttribPointer(this.aUvLocation, 2, gl.FLOAT, false, 0, 0);
+		// gl.enableVertexAttribArray(this.aUvLocation);
+
 		gl.uniformMatrix4fv(this._uViewMatrixLocation, false, camera.viewMatrix);
 		gl.uniformMatrix4fv(this._uProjectionMatrixLocation, false, camera.projectionMatrix);
 
@@ -264,6 +383,8 @@ export class SkyBox {
 
 		gl.drawArrays(gl.TRIANGLES, 0, this._cnt);
 	}
+
+	renderSpecularMap() {}
 
 	initCubemapLayout() {
 		this.layout = {};

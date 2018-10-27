@@ -1,14 +1,19 @@
+#version 300 es
+
 precision highp float;
 
 uniform samplerCube uTexture;
 // uniform sampler2D uTexture;
 
-varying vec3 vNorm;
-varying vec2 vUv;
+in vec3 vNorm;
+// in vec2 vUv;
+
+out vec4 myOutputColor;
 
 void main() {
-    gl_FragColor = textureCube(uTexture, vNorm);
+    // myOutputColor = texture(uTexture, vNorm); 
 
-    // gl_FragColor = texture2D(uTexture, vUv);
-    // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    myOutputColor = texture(uTexture, vNorm);
+    // myOutputColor.a = 1.0; 
+    // myOutputColor = vec4(vUv, 0.0, 1.0);
 }

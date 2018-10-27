@@ -1,17 +1,19 @@
+#version 300 es
+
 precision highp float;
 
-attribute vec4 position;
-attribute vec3 normal;
-attribute vec2 uv;
+in vec4 position;
+in vec3 normal;
+in vec2 uv;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uNormalMatrix;
 
-varying vec3 vNormal;
-varying vec3 vWorldPos;
-varying vec2 vUv;
+out vec3 vNormal;
+out vec3 vWorldPos;
+out vec2 vUv;
 
 void main() {
     vWorldPos = vec3(uModelMatrix * position);

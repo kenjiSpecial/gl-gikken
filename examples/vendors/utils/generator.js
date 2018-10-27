@@ -402,3 +402,74 @@ export function createSimpleBox(width, height, depth) {
 		layoutPosition: layoutPosition
 	};
 }
+
+export function createSimplePlane(width, height) {
+	let x = -width / 2;
+	let y = -height / 2;
+
+	let bl = {
+		x: x,
+		y: y,
+		z: 0
+	};
+	let br = {
+		x: x + width,
+		y: y,
+		z: 0
+	};
+	let tl = {
+		x: x,
+		y: y + height,
+		z: 0
+	};
+	let tr = {
+		x: x + width,
+		y: y + height,
+		z: 0
+	};
+
+	let positions = new Float32Array([
+		bl.x,
+		bl.y,
+		bl.z,
+		br.x,
+		br.y,
+		br.z,
+		tl.x,
+		tl.y,
+		tl.z,
+		tl.x,
+		tl.y,
+		tl.z,
+		br.x,
+		br.y,
+		br.z,
+		tr.x,
+		tr.y,
+		tr.z
+	]);
+
+	let uvs = new Float32Array([
+		//front
+		0,
+		0,
+		1,
+		0,
+		0,
+		1,
+		0,
+		1,
+		1,
+		0,
+		1,
+		1
+	]);
+
+	let normals = new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
+
+	return {
+		positions: positions,
+		normals: normals,
+		uvs: uvs
+	};
+}

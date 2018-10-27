@@ -272,3 +272,37 @@ export function createEmptyCubemap(gl, textureWidth, textureHeight) {
 
 	return texture;
 }
+
+export function createEmptyLodCubemap(gl, textureWidth, textureHeight, min, max) {
+	let texture = gl.createTexture();
+
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	// gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_LOD, min);
+	// gl.texParameterf(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, max);
+
+	for (let ii = 0; ii < 6; ii++) {
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const border = 0;
+		const format = gl.RGBA;
+		const type = gl.UNSIGNED_BYTE;
+		const data = null;
+		gl.texImage2D(
+			gl.TEXTURE_CUBE_MAP_POSITIVE_X + ii,
+			level,
+			internalFormat,
+			textureWidth,
+			textureHeight,
+			border,
+			format,
+			type,
+			data
+		);
+	}
+	gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+	return texture;
+}

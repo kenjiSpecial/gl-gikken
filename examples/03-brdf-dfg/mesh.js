@@ -15,7 +15,6 @@ export class Mesh {
 		this._gl = params.gl;
 		this._textureType = params.textureType ? params.textureType : 'brick';
 		this._time = 0;
-		
 
 		this._createProgram(params.vertexShaderSrc, params.fragmentShaderSrc);
 		this._createBuffer(params.data);
@@ -83,8 +82,12 @@ export class Mesh {
 		this.uNormalTexLocation = this._program.uniform.uNormalTex.location;
 		this.uRoughnessTexLocation = this._program.uniform.uRoughnessTex.location;
 		this.uMetallicTexLocation = this._program.uniform.uMetallicTex.location;
-
+		// IBL
+		this.uPrefilterCubemapLocation = this._program.uniform.uPrefilterMap.location;
 		this.uIrradianceCubemapLocation = this._program.uniform.uIrradianceMap.location;
+		this.uBrdfLUTTexLocation = this._program.uniform.uBrdfLUTTex.location;
+		console.log(this._program.uniform);
+		console.log(this.uPrefilterCubemapLocation);
 
 		this.uLightPosLocation = this._program.uniform.uLightPos.location;
 		this.uCameraPosLocation = this._program.uniform.uCameraPos.location;
@@ -188,6 +191,14 @@ export class Mesh {
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.irradianceCubemap);
 		gl.uniform1i(this.uIrradianceCubemapLocation, 5);
 
+		gl.activeTexture(gl.TEXTURE6);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.prefilterCubeMap);
+		gl.uniform1i(this.uPrefilterCubemapLocation, 6);
+
+		gl.activeTexture(gl.TEXTURE7);
+		gl.bindTexture(gl.TEXTURE_2D, this.brdfLUTTexture);
+		gl.uniform1i(this.uBrdfLUTTexLocation, 7);
+
 		const modelMat = this._modelMatrix; //Arr[xx][yy];
 		const normalMat = this._normalMatrix; //Arr[xx][yy];
 
@@ -274,8 +285,16 @@ export class Mesh {
 		this.textures = textures;
 	}
 
-	addIrradianceCubemap(irradianceCubemap){
+	addIrradianceCubemap(irradianceCubemap) {
 		this.irradianceCubemap = irradianceCubemap;
-		console.log(this.irradianceCubemap);
+		// console.log(this.irradianceCubemap);
+	}
+
+	addPrefilterCubeMap(prefilterCubeMap) {
+		this.prefilterCubeMap = prefilterCubeMap;
+	}
+
+	addBrdfLUTTexture(brdfLUTTexture) {
+		this.brdfLUTTexture = brdfLUTTexture;
 	}
 }
