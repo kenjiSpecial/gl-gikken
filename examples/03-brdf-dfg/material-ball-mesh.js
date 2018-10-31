@@ -21,7 +21,7 @@ export class MaterialBallMesh extends Mesh {
 
 	addGui(gui) {
 		const materialBallGui = gui.addFolder('materialBall');
-		materialBallGui.add(this, '_textureType', ['fabric', 'chipped', 'brick', 'dirtyGold']);
+		materialBallGui.add(this, '_textureType', ['fabric', 'chipped', 'gold', 'dirtyGold']);
 		materialBallGui.open();
 	}
 }

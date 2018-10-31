@@ -86,8 +86,6 @@ export class Mesh {
 		this.uPrefilterCubemapLocation = this._program.uniform.uPrefilterMap.location;
 		this.uIrradianceCubemapLocation = this._program.uniform.uIrradianceMap.location;
 		this.uBrdfLUTTexLocation = this._program.uniform.uBrdfLUTTex.location;
-		console.log(this._program.uniform);
-		console.log(this.uPrefilterCubemapLocation);
 
 		this.uLightPosLocation = this._program.uniform.uLightPos.location;
 		this.uCameraPosLocation = this._program.uniform.uCameraPos.location;

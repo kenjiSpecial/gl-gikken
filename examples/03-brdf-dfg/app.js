@@ -24,6 +24,7 @@ import {
 	chippedImagesUrls,
 	fabricImagesUrls,
 	brickImagesUrls,
+	goldImagesUrls,
 	dirtyGoldImagesUrls
 } from '../vendors/utils/textures';
 
@@ -43,10 +44,6 @@ export default class App {
 		this.gl = this.canvas.getContext('webgl2');
 
 		this.glState = {
-			// hasLODExtension: this.gl.getExtension('EXT_shader_texture_lod'),
-			// hasDerivativesExtension: this.gl.getExtension('OES_standard_derivatives'),
-			// hasSRGBExt: this.gl.getExtension('EXT_SRGB'),
-			// hasIndexUnit: this.gl.getExtension('OES_element_index_uint'),
 			uniforms: {
 				textures: {}
 			}
@@ -84,6 +81,7 @@ export default class App {
 		duration = performance.now() - start;
 
 		console.log('skybox rendering', duration);
+
 		start = performance.now();
 		for (let ii = 0; ii < count; ii++) {
 			gl.viewport(0, 0, this._width, this._height);
@@ -122,7 +120,7 @@ export default class App {
 
 	_createCamera() {
 		this._camera = new PerspectiveCamera(this._width, this._height, 45, 0.01, 10000);
-		this._camera.position.z = 60;
+		this._camera.position.z = 40;
 		this._camera.lookAt([0, 0, 0]);
 	}
 
@@ -166,8 +164,8 @@ export default class App {
 		loadTextures(
 			this.gl,
 			this.glState,
-			'brick',
-			brickImagesUrls,
+			'gold',
+			goldImagesUrls,
 			this.onLoadTextureComplete.bind(this)
 		);
 
@@ -190,7 +188,6 @@ export default class App {
 		this._mesh.addTexture(this.glState.uniforms.textures);
 
 		this.createSkyBox();
-		console.log(this.skybox.irradianceCubemap);
 		this._mesh.addIrradianceCubemap(this.skybox.irradianceCubemap);
 		this._mesh.addPrefilterCubeMap(this.skybox.envmapCubemap);
 		this._mesh.addBrdfLUTTexture(this.skybox.lTUtexture);

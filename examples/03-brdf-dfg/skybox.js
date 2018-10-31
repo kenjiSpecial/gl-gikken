@@ -180,7 +180,7 @@ export class SkyBox {
 			);
 			gl.viewport(0, 0, mipWidth, mipHeight);
 			const roughness = mip / (maxMipLevels - 1);
-			console.log('mipWidth', mipWidth, 'roughness', roughness, 'mip', mip);
+			// console.log('mipWidth', mipWidth, 'roughness', roughness, 'mip', mip);
 
 			for (let ii = 0; ii < viewArray.length; ii++) {
 				mat4.lookAt(viewMatrix, [0, 0, 0], viewArray[ii][0], viewArray[ii][1]);
@@ -232,7 +232,7 @@ export class SkyBox {
 	}
 
 	createLTUTexture() {
-		console.log('createLTUTextures');
+		// console.log('createLTUTextures');
 		const { positions, uvs } = createSimplePlane(2, 2);
 		const textureSize = 256;
 
