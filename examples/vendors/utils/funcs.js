@@ -82,7 +82,9 @@ export function loadTextures(gl, state, name, urls, callback) {
 
 	function onLoadImage(url, image) {
 		return function() {
-			let texName = url.split('/')[1].split('.')[0];
+			let fileUrl = url.split('/')[1] ? url.split('/')[1] : url.split('/')[0];
+			let texName = fileUrl.split('.')[0];
+
 			let texture = gl.createTexture();
 
 			gl.activeTexture(gl.TEXTURE0);

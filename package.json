@@ -12,8 +12,11 @@
     "00": "parcel examples/00-lighting/index.html --no-hmr",
     "dist00": "parcel build examples/00-lighting/index.html -d docs/00 --public-url ./  --no-source-maps",
     "01": "parcel examples/01-opengl-tutorial/index.html --no-hmr",
+    "dist01": "parcel build examples/01-opengl-tutorial/index.html -d docs/01 --public-url ./  --no-source-maps",
     "02": "parcel examples/02-opengl-tutorial/index.html --no-hmr",
+    "dist02": "parcel build examples/02-opengl-tutorial/index.html -d docs/02 --public-url ./  --no-source-maps",
     "03": "parcel examples/03-brdf-dfg/index.html --no-hmr",
+    "dist03": "parcel build examples/03-brdf-dfg/index.html -d docs/03 --public-url ./  --no-source-maps",
     "server": "http-server ./",
     "parseObj": "node obj-parser/parser.js"
   },
