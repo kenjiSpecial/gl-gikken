@@ -1,5 +1,3 @@
-// import { diffuseImagesUrls, specualarImageUrls, environmentImagesUrls } from './enviroment-maps';
-
 export function getAjaxJson(url) {
 	let promiseObj = new Promise(function(resolve, reject) {
 		let xhr = new XMLHttpRequest();
