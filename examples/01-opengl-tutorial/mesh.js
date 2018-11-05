@@ -64,6 +64,7 @@ export class Mesh {
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), gl.STATIC_DRAW);
 
 		this._cnt = indices.length;
+		console.log(this._cnt);
 	}
 
 	_createMatrix() {
@@ -190,14 +191,13 @@ export class Mesh {
 			gl.uniform1i(this._uAoTexLocation, 1);
 		}
 
-		if(this._uNormalTexLocation){
+		if (this._uNormalTexLocation) {
 			gl.activeTexture(gl.TEXTURE2);
 			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].normal);
 			gl.uniform1i(this._uNormalTexLocation, 2);
 		}
 
-
-		if(this._uRoughnessTexLocation){
+		if (this._uRoughnessTexLocation) {
 			gl.activeTexture(gl.TEXTURE3);
 			gl.bindTexture(gl.TEXTURE_2D, this._textures[this._textureType].roughness);
 			gl.uniform1i(this._uRoughnessTexLocation, 3);

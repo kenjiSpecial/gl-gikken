@@ -10,15 +10,8 @@ import vertexShaderSrc from './components/shaders/shader.vert.glsl';
 import fragmentShaderSrc from './components/shaders/shader.frag.glsl';
 import { Grid } from '../vendors/utils/grid/grid.js';
 
-import { loadCubeMap, loadTextures } from '../vendors/utils/funcs';
-
-import {
-	environmentMoonlessImagesUrls,
-	environmentPortlandImagesUrls,
-	environmentRoadImagesUrls
-} from '../vendors/utils/enviroment-maps';
-
-import { barkImagesUrls, goldImagesUrls, stoneImagesUrls } from '../vendors/utils/textures';
+import { loadTextures } from '../vendors/utils/funcs';
+import { barkImagesUrls } from '../vendors/utils/textures';
 
 export default class App {
 	constructor(params = {}) {
@@ -99,7 +92,7 @@ export default class App {
 		this._mesh.addTexture(this.glState.uniforms.textures);
 
 		this.isLoop = true;
-		this._curTime = +new Date;
+		this._curTime = +new Date();
 		TweenLite.ticker.addEventListener('tick', this.loop, this);
 	}
 
@@ -112,7 +105,6 @@ export default class App {
 	}
 
 	start() {
-		
 		this._startIndex = 0;
 		this._loadTextures();
 	}
@@ -134,7 +126,7 @@ export default class App {
 	loop() {
 		if (this._stats) this._stats.update();
 		const gl = this.gl;
-		let time = +new Date;
+		let time = +new Date();
 		let del = time - this._curTime;
 
 		gl.viewport(0, 0, this._width, this._height);
